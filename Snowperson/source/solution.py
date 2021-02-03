@@ -22,6 +22,10 @@ def heur_manhattan_distance(state):
     #When calculating distances, assume there are no obstacles on the grid.
     #You should implement this heuristic function exactly, even if it is tempting to improve it.
     #Your function should return a numeric value; this is the estimate of the distance to the goal.
+
+    # check the ball's position.
+    
+
     return 0
 
 
