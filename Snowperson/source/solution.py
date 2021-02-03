@@ -24,9 +24,20 @@ def heur_manhattan_distance(state):
     #Your function should return a numeric value; this is the estimate of the distance to the goal.
 
     # check the ball's position.
-    
+    snowballs = state.snowballs
+    positions = snowballs.key()
 
-    return 0
+    destination = state.destination
+
+    # total distance
+    distance = 0
+
+    #calculate the position of the balls to the destination
+    for position in positions:
+      distance += abs(position[0] - destination[0])
+      distance += abs(position[1] - destination[1])
+
+    return distance
 
 
 #HEURISTICS
@@ -44,6 +55,7 @@ def heur_alternate(state):
     #heur_manhattan_distance has flaws.
     #Write a heuristic function that improves upon heur_manhattan_distance to estimate distance between the current state and the goal.
     #Your function should return a numeric value for the estimate of the distance to the goal.
+
     return 0
 
 def heur_zero(state):
@@ -67,7 +79,11 @@ def fval_function(sN, weight):
     #The function must return a numeric f-value.
     #The value will determine your state's position on the Frontier list during a 'custom' search.
     #You must initialize your search engine object as a 'custom' search engine if you supply a custom fval function.
-    return 0
+    
+    # f = g + weight*h 
+    fval = sN.gval + weight * sN.hval
+
+    return fval
 
 def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound = 5):
 #IMPLEMENT
