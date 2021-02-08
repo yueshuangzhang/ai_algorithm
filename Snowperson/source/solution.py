@@ -91,6 +91,9 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound = 5):
   '''INPUT: a sokoban state that represents the start state and a timebound (number of seconds)'''
   '''OUTPUT: A goal state (if a goal is found), else False'''
   '''implementation of weighted astar algorithm'''
+
+  #
+
   return False
 
 def anytime_gbfs(initial_state, heur_fn, timebound = 5):
@@ -99,4 +102,32 @@ def anytime_gbfs(initial_state, heur_fn, timebound = 5):
   '''INPUT: a sokoban state that represents the start state and a timebound (number of seconds)'''
   '''OUTPUT: A goal state (if a goal is found), else False'''
   '''implementation of weighted astar algorithm'''
-  return False
+
+  # get the current time and the time limit
+  start_time = os.times()[0]
+  end_time = start_time + timebound # projected end time
+  current_time = os.times()[0]
+
+  # GBFS: Use only the h(n). Goal h(n) = 0. -> Always choose the smallest h(n)
+
+  # Define the search method to be used: best first with cycle checking enabled
+  search = SearchEngine(strategy='best_first', cc_level='full')
+
+  # Initialize the search
+  search.init_search(initial_state, snowman_goal_state, heur_fn)
+  costbound = (float('inf'),float('inf'),float('inf'))
+
+  # when the search is within limit
+  while current_time < end_time:
+    
+    # get the best search result using the search engine.
+    result = search.search(end_time, costbound)
+
+    if (result):
+      final_result = result
+      costbound = (result.gval, float('inf'), float('inf'))
+      current_time = os.times()[0]
+    else:
+      return final_result
+
+  return final_result
