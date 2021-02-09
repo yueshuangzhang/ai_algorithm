@@ -25,7 +25,7 @@ def heur_manhattan_distance(state):
 
     # check the ball's position.
     snowballs = state.snowballs
-    positions = snowballs.key()
+    positions = snowballs.keys()
 
     destination = state.destination
 
@@ -92,9 +92,46 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound = 5):
   '''OUTPUT: A goal state (if a goal is found), else False'''
   '''implementation of weighted astar algorithm'''
 
-  #
+  # initialize variable to return
+  final_result = False
 
-  return False
+  # get the current time and the time limit
+  start_time = os.times()[0]
+  end_time = start_time + timebound # projected end time
+  current_time = os.times()[0]
+  remain_time = end_time - current_time
+
+  # GBFS: Use the h(n) & g(n). f = w*h + g
+
+  # Define the search method to be used: best first with cycle checking enabled
+  search_engine = SearchEngine(strategy='custom', cc_level='full')
+
+  # Initialize the search with function
+  f_function = (lambda sN: fval_function(sN, weight))
+  search_engine.init_search(initial_state, snowman_goal_state, f_function)
+  # (g bound,h bound,g + h bound)
+  costbound = (float('inf'),float('inf'),float('inf'))
+
+  # when the search is within limit
+  while current_time < end_time:
+    
+    # get the best search result using the search engine.
+    result = search_engine.search(remain_time, costbound)
+
+    if (result): # result == true
+      # update remaining time
+      current_time = os.times()[0]
+      remain_time = end_time - current_time
+
+      if result.gval <=costbound[0]:
+        # (g bound,h bound,g + h bound)
+        costbound = (result.gval, result.gval, result.gval + result.gval)
+        final_result = result
+
+    else: # result == false
+      return final_result
+
+  return final_result
 
 def anytime_gbfs(initial_state, heur_fn, timebound = 5):
 #IMPLEMENT
@@ -103,31 +140,42 @@ def anytime_gbfs(initial_state, heur_fn, timebound = 5):
   '''OUTPUT: A goal state (if a goal is found), else False'''
   '''implementation of weighted astar algorithm'''
 
+  # initialize variable to return
+  final_result = False
+
   # get the current time and the time limit
   start_time = os.times()[0]
   end_time = start_time + timebound # projected end time
   current_time = os.times()[0]
+  remain_time = end_time - current_time
 
   # GBFS: Use only the h(n). Goal h(n) = 0. -> Always choose the smallest h(n)
 
   # Define the search method to be used: best first with cycle checking enabled
-  search = SearchEngine(strategy='best_first', cc_level='full')
+  search_engine = SearchEngine(strategy='best_first', cc_level='full')
 
   # Initialize the search
-  search.init_search(initial_state, snowman_goal_state, heur_fn)
+  search_engine.init_search(initial_state, snowman_goal_state, heur_fn)
+  # (g bound,h bound,g + h bound)
   costbound = (float('inf'),float('inf'),float('inf'))
 
   # when the search is within limit
   while current_time < end_time:
     
     # get the best search result using the search engine.
-    result = search.search(end_time, costbound)
+    result = search_engine.search(remain_time, costbound)
 
-    if (result):
-      final_result = result
-      costbound = (result.gval, float('inf'), float('inf'))
+    if (result): # result == true
+      # update remaining time
       current_time = os.times()[0]
-    else:
+      remain_time = end_time - current_time
+
+      if result.gval <=costbound[0]:
+        # (g bound,h bound,g + h bound)
+        costbound = (result.gval, result.gval, result.gval + result.gval)
+        final_result = result
+
+    else: # result == false
       return final_result
 
   return final_result
