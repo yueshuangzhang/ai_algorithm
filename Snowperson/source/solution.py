@@ -23,6 +23,9 @@ def heur_manhattan_distance(state):
     #You should implement this heuristic function exactly, even if it is tempting to improve it.
     #Your function should return a numeric value; this is the estimate of the distance to the goal.
 
+    if (snowman_goal_state(state)):
+      return 0
+
     # check the ball's position.
     snowballs = state.snowballs
     positions = snowballs.keys()
@@ -56,7 +59,79 @@ def heur_alternate(state):
     #Write a heuristic function that improves upon heur_manhattan_distance to estimate distance between the current state and the goal.
     #Your function should return a numeric value for the estimate of the distance to the goal.
 
-    return 0
+    '''
+    This is my thoughts: only for s and m balls
+    1. For any snowballs that's right besides the wall/obs: if >= 3 sides is wall/ obsticals & not goal , then distance = inf
+    if == 2 sides is obs, top-left, top-right, bottom-right, bottom-left, & not goal, is cornor, distance = inf
+    else is a tunnel, then for weight/height steps, if there is a obs, then dis ++
+
+    if == 1, it should be fine .. ignore this case first
+    
+    use robot to determine the direction!
+    '''
+
+    if (snowman_goal_state(state)):
+      return 0
+
+    width = state.width
+    height = state.height
+    robot = state.robot
+    destination = state.destination
+    snowballs = state.snowballs
+    obstacles = state.obstacles
+
+    # total distance
+    distance = 0
+
+    #for all balls:
+    for snowball in snowballs:
+      '''check the number of walls and obticals surrounding the ball'''
+      snowball_x = snowball[0]
+      snowball_y = snowball[1]
+
+      # bools to keep the position info
+      is_wall_up = False
+      is_wall_down = False
+      is_wall_left = False
+      is_wall_right = False
+
+      is_ob_up = False
+      is_ob_down = False
+      is_ob_left = False
+      is_ob_right = False
+
+      #direction of the push =======================================================
+
+
+      for i in range(-1,2,1):# -1, 0, 1
+        for j in range(-1,2,1):# -1, 0 1
+
+          if(abs(i) != abs(j)): # skip corner and itself
+            new_position_x = snowball_x + i
+            new_position_y = snowball_y + j
+
+            # check walls
+            num_block = 0
+            if(new_position_x < 0 or new_position_x >= width):
+              num_block += num_block
+            elif(new_position_y < 0 or new_position_y >= height):
+              num_block += num_block
+
+            # check obsticals
+            elif((new_position_x,new_position_y) in obstacles):
+              num_block += num_block
+
+      if num_block >=3:
+        distance = float('inf')
+      
+      elif num_block == 2:
+        return heur_manhattan_distance(state)
+
+      else:
+        return heur_manhattan_distance(state)
+
+    return distance
+
 
 def heur_zero(state):
     '''Zero Heuristic can be used to make A* search perform uniform cost search'''
