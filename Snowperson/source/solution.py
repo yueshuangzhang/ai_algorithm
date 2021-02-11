@@ -76,7 +76,6 @@ def heur_alternate(state):
     width = state.width
     height = state.height
     robot = state.robot
-    destination = state.destination
     snowballs = state.snowballs
     obstacles = state.obstacles
 
@@ -100,9 +99,7 @@ def heur_alternate(state):
       is_ob_left = False
       is_ob_right = False
 
-      #direction of the push =======================================================
-
-
+      # check where are the obsticals
       for i in range(-1,2,1):# -1, 0, 1
         for j in range(-1,2,1):# -1, 0 1
 
@@ -110,25 +107,73 @@ def heur_alternate(state):
             new_position_x = snowball_x + i
             new_position_y = snowball_y + j
 
-            # check walls
+            # check surrounding up, down, left, right
             num_block = 0
+
             if(new_position_x < 0 or new_position_x >= width):
               num_block += num_block
+              if (i == 0):
+                if (j == 1):
+                  is_wall_right = True
+                else:
+                  is_wall_left = True
+              else: #j = 0
+                if (i == 1):
+                  is_wall_down = True 
+                else:
+                  is_wall_up = True
+            
+            # out of bound
             elif(new_position_y < 0 or new_position_y >= height):
               num_block += num_block
+              if (i == 0):
+                if (j == 1):
+                  is_wall_right = True
+                else:
+                  is_wall_left = True
+              else: #j = 0
+                if (i == 1):
+                  is_wall_down = True 
+                else:
+                  is_wall_up = True
 
             # check obsticals
             elif((new_position_x,new_position_y) in obstacles):
               num_block += num_block
-
+              if (i == 0):
+                if (j == 1):
+                  is_ob_right = True
+                else:
+                  is_ob_left = True
+              else: #j = 0
+                if (i == 1):
+                  is_ob_down = True 
+                else:
+                  is_ob_up = True
+              
       if num_block >=3:
         distance = float('inf')
       
       elif num_block == 2:
-        return heur_manhattan_distance(state)
+        # 2 ob/wall
+        
+        #Case 1: it's corner
+        if ((is_wall_up and is_wall_left) or (is_wall_up and is_wall_left) or (is_wall_up and is_wall_left) or (is_wall_up and is_wall_left)):
+          if (snowman_goal_state(state)):
+            return 0
+          else: distance = float('inf')
+
+        else:
+          if ((is_ob_up and is_ob_left) or (is_ob_up and is_ob_left) or (is_ob_up and is_ob_left) or (is_ob_up and is_ob_left)):
+            if (snowman_goal_state(state)):
+              return 0
+            else: distance = float('inf')
+
+
+
 
       else:
-        return heur_manhattan_distance(state)
+        return heur_manhattan_distance(state) + 2
 
     return distance
 
