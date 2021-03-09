@@ -1,0 +1,39 @@
+This is my thoughts: 
+
+1. check if the current state is the goal, if it is the goal state.
+    If the current state is the goal state, then return 0 
+    (since there is no cost to go to the goal)
+
+2. Loop through the snowballs and get information on the obsticals and walls
+
+    2.1 first check if the snowball in bound, 
+        return infinity if it's out of bound.
+    
+    2.2 check if the position of the robot is right besides the snowballs
+        Therefore, calculate the x and y difference between the two.
+        if the x difference or the y difference is > 1, 
+        then it means that there are gaps between the snowball and the robot.
+
+        2.2.0 first store the infomation of the balls for futher calculation.
+
+        2.2.1 If the robot locate within the 2*2 square of the two.
+            find out the situation surrounding the current ball.
+            Like walls and others
+
+            so if there are 3 or more walls, the cost is inf
+            if there are 2 walls, if it is corners then the cost is inf
+            if it is a tunnel, then if the robot is pushing the ball towards the goal, no effet
+            if there is ones wall, then, as long as not against the wall, it is fine. robot pushing towards the wall gets inf.
+
+        2.2.2 If the robot locate out of the 2*2 square of the 2 (not beside)
+            In this situation, go to the correct snowball is the step to achieve the goal:
+            
+            If the current state is that no snowballs stacks together, then find the mid ball,
+            and then get the small ball, sum with their manhattan distance.
+
+            Or, if the state is that there is a stack, then find the small ball.
+
+            After the robot goes to the position besides the balls, 
+            then the heur function being called next time will go to the casses that 2.2.1 discussed.
+
+            Compute the distance when get out of the for loop that gets the info of the balls

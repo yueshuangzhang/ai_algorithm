@@ -88,52 +88,37 @@ def heur_alternate(state):
     distance = 0
 
     #get the stack situation of the balls
-    s_x = s_y = m_x = m_y = -1
+    s_x = -1
+    s_y = -1
+    m_x = -1
+    m_y = -1
+    b_x = -1
+    b_y = -1
+
     #for all balls:
-    for snowball in snowballs:      
-      snowball_x = snowball[0]
-      snowball_y = snowball[1]
-
-      if(snowball_x < 0 or snowball_x > width or snowball_y < 0 or snowball_y > height):
-        return float("inf")
-
-      # get the current status of the snowballs 
-      # get current snowball's info:
-      if(state.snowballs[snowball] == 2):
-        s_x = snowball_x
-        s_y = snowball_y
-
-      elif (state.snowballs[snowball] == 1):
-        m_x = snowball_x
-        m_y = snowball_y
-
-        #3 type 'A' snowman is formed by placing a medium snowball atop big one.
-        #4 type 'B' snowman is formed by placing a small snowball atop medium one.
-        #5 type 'C' snowman is formed by placing a small snowball atop big one.
-      elif (state.snowballs[snowball] == 3):
-        m_x = snowball_x
-        m_y = snowball_y
-
-      elif (state.snowballs[snowball] == 4):
-        s_x = snowball_x
-        s_y = snowball_y
-        m_x = snowball_x
-        m_y = snowball_y
-
-      elif (state.snowballs[snowball] == 5):
-        s_x = snowball_x
-        s_y = snowball_y
-       
-      elif (state.snowballs[snowball] == 6):
-        return 0
-
     for snowball in snowballs:
       '''check the number of walls and obticals surrounding the ball'''
       snowball_x = snowball[0]
       snowball_y = snowball[1]
+
       #check if snowball in bound:
       if(snowball_x < 0 or snowball_x > width or snowball_y < 0 or snowball_y > height):
         return float("inf")
+
+      # if the robot is not clost to the snow ball, then the snow ball is the current small goal
+      if (abs(robot_x - snowball_x) > 1 or abs(robot_y - snowball_y) > 1): 
+        
+        # get the current status of the snowballs 
+        # get current snowball's info:
+        if(state.snowballs[snowball] == 3):
+          s_x = snowball_x
+          s_y = snowball_y
+        elif (state.snowballs[snowball] == 4):
+          m_x = snowball_x
+          m_y = snowball_y
+        elif (state.snowballs[snowball] == 5):
+          b_x = snowball_x
+          b_y = snowball_y
 
       # if the current snowball is close to the robot's position
       else:
@@ -159,126 +144,127 @@ def heur_alternate(state):
               # check surrounding up, down, left, right
               num_block = 0
 
-              if(new_position_x < 0 or new_position_x > width):
+              if(new_position_x < 0 or new_position_x >= width):
                 num_block += num_block
                 if (i == 0):
-                  if (j == 1): is_wall_right = True
-                  else: is_wall_left = True
+                  if (j == 1):
+                    is_wall_right = True
+                  else:
+                    is_wall_left = True
                 else: #j = 0
-                  if (i == 1):is_wall_down = True 
-                  else:is_wall_up = True
+                  if (i == 1):
+                    is_wall_down = True 
+                  else:
+                    is_wall_up = True
               
               # out of bound
-              elif(new_position_y < 0 or new_position_y > height):
+              elif(new_position_y < 0 or new_position_y >= height):
                 num_block += num_block
                 if (i == 0):
-                  if (j == 1):is_wall_up = True
-                  else:is_wall_down = True
+                  if (j == 1):
+                    is_wall_up = True
+                  else:
+                    is_wall_down = True
                 else: #j = 0
-                  if (i == 1): is_wall_right = True 
-                  else:is_wall_left = True
+                  if (i == 1):
+                    is_wall_right = True 
+                  else:
+                    is_wall_left = True
 
               # check obsticals
-              elif((new_position_x, new_position_y) in obstacles):
+              elif((new_position_x,new_position_y) in obstacles):
                 num_block += num_block
                 if (i == 0):
-                  if (j == 1): is_ob_up = True
-                  else: is_ob_down = True
+                  if (j == 1):
+                    is_ob_up = True
+                  else:
+                    is_ob_down = True
                 else: #j = 0
-                  if (i == 1): is_ob_right = True 
-                  else: is_ob_left = True
-
+                  if (i == 1):
+                    is_ob_right = True 
+                  else:
+                    is_ob_left = True
+                
         if num_block >=3:
-          return float('inf')
+          distance = float('inf')
         
         elif num_block == 2:
-          # 2 ob/wall 
+          # 2 ob/wall
+          
           #Case 1: it's corner
           if ((is_wall_up and is_wall_left) or (is_wall_up and is_wall_right) or (is_wall_down and is_wall_left) or (is_wall_down and is_wall_right)):
-            if (snowman_goal_state(state)): return 0
-            else: return float('inf')
+            if (snowman_goal_state(state)):
+              return 0
+            else: distance = float('inf')
 
           elif ((is_ob_up and is_ob_left) or (is_ob_up and is_ob_right) or (is_ob_down and is_ob_left) or (is_ob_down and is_ob_right)):
-              if (snowman_goal_state(state)): return 0
-              else: return float('inf')
+              if (snowman_goal_state(state)):
+                return 0
+              else: distance = float('inf')
 
           # Case 2: it's a tunnel
           # if the moving direction is towards the goal, then it's fine
           if ((is_wall_up and is_wall_down) or (is_ob_up and is_ob_down)):
             # check the robot's position
-            if (snowman_goal_state(state)): return 0
+            if (snowman_goal_state(state)):
+              return 0
             else: 
               # check if it towards the goal
               # col vs col for up right position
-              if (robot_x > snowball_x) and (snowball_x > destination_x):
-                new_dis = heur_manhattan_distance(state)
-                distance = max(new_dis, distance)
-              else: return float('inf')
+              if (robot_y > snowball_y) and (snowball_y > destination_y):
+                distance = heur_manhattan_distance(state)
+              else:
+                distance = float('inf')
 
           elif ((is_wall_left and is_wall_right) or (is_ob_left and is_ob_right)):
-              if (snowman_goal_state(state)): return 0
+              if (snowman_goal_state(state)):
+                return 0
               else: 
                 # row vs row for up right position
-                if (robot_y > snowball_y) and (snowball_y > destination_y):
-                  new_dis = heur_manhattan_distance(state)
-                  distance = max(new_dis, distance)
-                else: return float('inf')
+                if (robot_x > snowball_x) and (snowball_x > destination_x):
+                  distance = heur_manhattan_distance(state)
+                else:
+                  distance = float('inf')
 
-        else:# there is only one wall besides the ball
+        else:
+          # if the direction is towards goal, it should be fine, 
+          # if the direction is against the wall, then + 2 to go to the opposite direction
+
           if (is_wall_up):
-            if ((robot_y < snowball_y) and abs(robot_y - snowball_y)==1):
-              return float('inf')
-            else: 
-              new_dis = heur_manhattan_distance(state)
-              distance = max(new_dis, distance)
+            if (robot_y > snowball_y) and (snowball_y > destination_y):
+                distance = heur_manhattan_distance(state)
+            else:
+                distance = float('inf')
 
           elif (is_wall_down):
-            if ((robot_y > snowball_y) and abs(robot_y - snowball_y)==1):
-              return float('inf')       
-            else: 
-              new_dis = heur_manhattan_distance(state)
-              distance = max(new_dis, distance)
+            if (robot_y > snowball_y) and (snowball_y > destination_y):
+                distance = heur_manhattan_distance(state)
+            else:
+                distance = float('inf')
 
           elif (is_wall_left):
-            if ((robot_x > snowball_x) and abs(robot_x - snowball_x)==1):
-              return float('inf')
-            else: 
-              new_dis = heur_manhattan_distance(state)
-              distance = max(new_dis, distance)
+            if (robot_x > snowball_x) and (snowball_x > destination_x):
+                  distance = heur_manhattan_distance(state)
 
-          elif (is_wall_right) :
-            if ((robot_x < snowball_x) and abs(robot_x - snowball_x)==1):
-              return float('inf')
+          elif (is_wall_right):
+            if (robot_x > snowball_x) and (snowball_x > destination_x):
+                  distance = heur_manhattan_distance(state)
             else:
-              new_dis = heur_manhattan_distance(state)
-              distance = max(new_dis, distance) 
-        
-      # if the robot is not clost to the snow ball, then the snow ball is the current small goal
-      if (abs(robot_x - snowball_x) > 1 and abs(robot_y - snowball_y) > 1):
-        if(state.snowballs[snowball] == 2 or state.snowballs[snowball] == 1 or state.snowballs[snowball] == 0):
-          # goal is to go to m
-          new_dis = abs(robot_x - m_x) + abs(robot_x - m_y) - 1 + abs(robot_x - s_x) + abs(robot_x - s_y) - 1 + heur_manhattan_distance(state)
-          distance = max(new_dis, distance)
+                distance = float('inf')
+  
+    # use the snowballs info and compute the cost to talk to corresponding snowballs
 
-        elif (state.snowballs[snowball] == 'A'):
-          #the goal is to get to s ball:
-          new_dis = abs(robot_x - m_x) + abs(robot_x - m_y) - 1 + heur_manhattan_distance(state)
-          distance = max(new_dis, distance)
+    if(s_x != -1 and s_y != -1 and m_x != -1 and m_y != -1 and b_x != -1 and b_y != -1):
+      # s m not together, s b not together  and m b not together
+      # if is_b_m_s
+      if((s_x != m_x and s_y != m_y) and (s_x != b_x and s_y != b_y) and (m_x != b_x and m_y != b_y)):
+        #the goal is to get to m ball and s ball then:
+        distance = abs(robot_x - m_x) + abs(robot_x - m_y) - 1 + abs(robot_x - s_x) + abs(robot_x - s_y) - 1 + heur_manhattan_distance(state)
+      # if is_bm_s
+      elif ((s_x != m_x and s_y != m_y) and (s_x != b_x and s_y != b_y) and (m_x == b_x and m_y == b_y)):
+        #the goal is to get to s ball:
+        distance = abs(robot_x - m_x) + abs(robot_x - m_y) - 1 + heur_manhattan_distance(state)
 
-      # seperate the s and m ball    
-      if(state.snowballs[snowball] == 2 or state.snowballs[snowball] == 1 or state.snowballs[snowball] == 0):
-        # if s and m ball is right next to each other,
-        #  So if it is s-m---g or m-s----g 
-        if((s_x == m_x and abs(s_y - m_y)==1)):
-          #horizontal located
-          if(destination_x == s_x):
-            return float('inf')
-
-        elif(s_y == m_y and abs(s_x - m_x)==1):
-          #vertically located
-          if(destination_y == s_y):
-            return float('inf')
-            
     return distance
 
 
