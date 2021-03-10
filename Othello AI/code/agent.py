@@ -31,8 +31,8 @@ def compute_heuristic(board, color): #not implemented, optional
     return 0 #change this!
 
 ############ MINIMAX ###############################
-# Key (board, color)   Value uti value
-cached = {} 
+# Key (board, color)   Value (move, uti valuecached)
+cached = {}
 def minimax_min_node(board, color, limit, caching = 0):
     
     # Determine the player color
@@ -47,23 +47,23 @@ def minimax_min_node(board, color, limit, caching = 0):
 
     # the valid moved
     valid_moves = get_possible_moves(board, color)
+    
     if (len(valid_moves) == 0):
         # no move valid and board is not cached
         if (caching):
             cached[(board, color)] = (None, compute_utility(board, color))
-
         return (None, compute_utility(board, color))
 
     elif (limit == 0):
         return (None, compute_utility(board, color))
     
     else:
-        u_value_best = float('INF')
+        u_value_best = float('inf')
         move_best = None
 
         for move in valid_moves:
             new_board = play_move(board, color, move[0], move[1])
-            u_value = minimax_max_node(new_board, oppo_color, limit - 1, caching)[]
+            u_value = minimax_max_node(new_board, oppo_color, limit - 1, caching)[1]
             
             # get the min value:
             if(u_value < u_value_best):
@@ -73,7 +73,7 @@ def minimax_min_node(board, color, limit, caching = 0):
         if (caching):
             cached[(board, color)] = (move_best, u_value_best)
     
-        return cached[(board, color)]
+        return (move_best, u_value_best)
 
 def minimax_max_node(board, color, limit, caching = 0): #returns highest possible utility
     #IMPLEMENT (and replace the line below)
