@@ -15,7 +15,15 @@ def eprint(*args, **kwargs): #you can use this for debugging, as it will print t
 # Method to compute utility value of terminal state
 def compute_utility(board, color):
     #IMPLEMENT
-    return 0 #change this!
+
+    p1_count, p2_count = get_score(board)
+    #Player color: 1 for dark (goes first), 2 for light. 
+
+    if(color == 1):
+        return p1_count - p2_count
+    else:
+        return p2_count - p1_count
+
 
 # Better heuristic value of board
 def compute_heuristic(board, color): #not implemented, optional
