@@ -76,11 +76,6 @@ def minimax_min_node(board, color, limit, caching = 0):
         return (move_best, u_value_best)
 
 def minimax_max_node(board, color, limit, caching = 0): #returns highest possible utility
-        # Determine the player color
-    if color == 1:
-        oppo_color = 2
-    else:
-        oppo_color = 1
     
     # check if in the cached
     if (board, color) in cached:
@@ -103,6 +98,12 @@ def minimax_max_node(board, color, limit, caching = 0): #returns highest possibl
         move_best = None
 
         for move in valid_moves:
+            # Determine the player color
+            if color == 1:
+                oppo_color = 2
+            else:
+                oppo_color = 1
+                
             new_board = play_move(board, color, move[0], move[1])
             u_value = minimax_max_node(new_board, oppo_color, limit - 1, caching)[1]
             
@@ -115,7 +116,6 @@ def minimax_max_node(board, color, limit, caching = 0): #returns highest possibl
             cached[(board, color)] = (move_best, u_value_best)
     
         return (move_best, u_value_best)
-
 
 
 def select_move_minimax(board, color, limit, caching = 0):
@@ -132,7 +132,8 @@ def select_move_minimax(board, color, limit, caching = 0):
     If caching is OFF (i.e. 0), do NOT use state caching to reduce the number of state evaluations.    
     """
     #IMPLEMENT (and replace the line below)
-    return (0,0) #change this!
+    move, utiltiy = minimax_max_node(board, color, limit, caching)
+    return move
 
 ############ ALPHA-BETA PRUNING #####################
 def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
