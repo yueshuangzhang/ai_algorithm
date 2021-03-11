@@ -139,96 +139,98 @@ def select_move_minimax(board, color, limit, caching = 0):
 def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
     #IMPLEMENT (and replace the line below)
 
-    if (board, color) in cached:
-        return cached[(board, color)]
+    # if (board, color) in cached:
+    #     return cached[(board, color)]
     
-    # the valid moved
-    valid_moves = get_possible_moves(board, color)
+    # # the valid moved
+    # valid_moves = get_possible_moves(board, color)
     
-    if (len(valid_moves) == 0):
-        # no move valid and board is not cached
-        if (caching):
-            cached[(board, color)] = (None, compute_utility(board, color))
-        return (None, compute_utility(board, color))
+    # if (len(valid_moves) == 0):
+    #     # no move valid and board is not cached
+    #     if (caching):
+    #         cached[(board, color)] = (None, compute_utility(board, color))
+    #     return (None, compute_utility(board, color))
 
-    elif (limit == 0):
-        return (None, compute_utility(board, color))
+    # elif (limit == 0):
+    #     return (None, compute_utility(board, color))
     
-    else:
-        u_value_best = float('inf')
-        move_best = None
+    # else:
+    #     u_value_best = float('inf')
+    #     move_best = None
 
-        for move in valid_moves:
-            # Determine the player color
-            if color == 1:
-                oppo_color = 2
-            else:
-                oppo_color = 1
+    #     for move in valid_moves:
+    #         # Determine the player color
+    #         if color == 1:
+    #             oppo_color = 2
+    #         else:
+    #             oppo_color = 1
 
-            new_board = play_move(board, color, move[0], move[1])
-            u_value = alphabeta_max_node(new_board, oppo_color, alpha, beta, limit - 1, caching, ordering)[1]
+    #         new_board = play_move(board, color, move[0], move[1])
+    #         u_value = alphabeta_max_node(new_board, oppo_color, alpha, beta, limit - 1, caching, ordering)[1]
             
-            # get the min value:
-            if(u_value < u_value_best):
-                u_value_best = u_value
-                move_best = move
+    #         # get the min value:
+    #         if(u_value < u_value_best):
+    #             u_value_best = u_value
+    #             move_best = move
 
-                if(u_value_best <= alpha):
-                    return u_value_best
+    #             if(u_value_best <= alpha):
+    #                 return u_value_best
                 
-                beta = min(beta, u_value_best) 
+    #             beta = min(beta, u_value_best) 
 
-        if (caching):
-            cached[(board, color)] = (move_best, u_value_best)
+    #     if (caching):
+    #         cached[(board, color)] = (move_best, u_value_best)
     
-        return (move_best, u_value_best)
+    #     return (move_best, u_value_best)
+    return ((0,0),0)
 
 
 def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
     #IMPLEMENT (and replace the line below)
-    if (board, color) in cached:
-        return cached[(board, color)]
+    # if (board, color) in cached:
+    #     return cached[(board, color)]
     
-    # the valid moved
-    valid_moves = get_possible_moves(board, color)
+    # # the valid moved
+    # valid_moves = get_possible_moves(board, color)
     
-    if (len(valid_moves) == 0):
-        # no move valid and board is not cached
-        if (caching):
-            cached[(board, color)] = (None, compute_utility(board, color))
-        return (None, compute_utility(board, color))
+    # if (len(valid_moves) == 0):
+    #     # no move valid and board is not cached
+    #     if (caching):
+    #         cached[(board, color)] = (None, compute_utility(board, color))
+    #     return (None, compute_utility(board, color))
 
-    elif (limit == 0):
-        return (None, compute_utility(board, color))
+    # elif (limit == 0):
+    #     return (None, compute_utility(board, color))
     
-    else:
-        u_value_best = float('-inf')
-        move_best = None
+    # else:
+    #     u_value_best = float('-inf')
+    #     move_best = None
 
-        for move in valid_moves:
-            # Determine the player color
-            if color == 1:
-                oppo_color = 2
-            else:
-                oppo_color = 1
+    #     for move in valid_moves:
+    #         # Determine the player color
+    #         if color == 1:
+    #             oppo_color = 2
+    #         else:
+    #             oppo_color = 1
 
-            new_board = play_move(board, color, move[0], move[1])
-            u_value = alphabeta_min_node(new_board, oppo_color, alpha, beta, limit - 1, caching, ordering)[1]
+    #         new_board = play_move(board, color, move[0], move[1])
+    #         u_value = alphabeta_min_node(new_board, oppo_color, alpha, beta, limit - 1, caching, ordering)[1]
             
-            # get the min value:
-            if(u_value > u_value_best):
-                u_value_best = u_value
-                move_best = move
+    #         # get the min value:
+    #         if(u_value > u_value_best):
+    #             u_value_best = u_value
+    #             move_best = move
 
-                if(u_value_best >= beta):
-                    return u_value_best
+    #             if(u_value_best >= beta):
+    #                 return u_value_best
                 
-                alpha = min(alpha, u_value_best) 
+    #             alpha = min(alpha, u_value_best) 
 
-        if (caching):
-            cached[(board, color)] = (move_best, u_value_best)
+    #     if (caching):
+    #         cached[(board, color)] = (move_best, u_value_best)
     
-        return (move_best, u_value_best)
+    #     return (move_best, u_value_best)
+    return ((0,0),0)
 
 def select_move_alphabeta(board, color, limit, caching = 0, ordering = 0):
     """
@@ -247,10 +249,11 @@ def select_move_alphabeta(board, color, limit, caching = 0, ordering = 0):
     """
     #IMPLEMENT (and replace the line below)
     #return alphabeta_max_node(board, color, float("-inf"), float("inf"), limit, caching, ordering)[0] #change this!
-    alpha = -1 * len(board) * len(board)
-    beta = -1 * alpha
-    move, utiltiy = alphabeta_max_node(board, color, alpha, beta, 6, caching, ordering)
-    return move
+    # alpha = -1 * len(board) * len(board)
+    # beta = -1 * alpha
+    # move, utiltiy = alphabeta_max_node(board, color, alpha, beta, 6, caching, ordering)
+    # return move
+    return ((0,0),0)
 
 
 ####################################################
