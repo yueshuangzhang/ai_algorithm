@@ -40,82 +40,86 @@ def minimax_min_node(board, color, limit, caching = 0):
         oppo_color = 2
     else:
         oppo_color = 1
-    
-    # check if in the cached
-    if (board, color) in cached:
-        return cached[(board, color)]
 
     # the valid moved
-    valid_moves = get_possible_moves(board, color)
+    valid_moves = get_possible_moves(board, oppo_color)
     
     if (len(valid_moves) == 0):
         # no move valid and board is not cached
-        if (caching):
-            cached[(board, color)] = (None, compute_utility(board, color))
-        return (None, compute_utility(board, color))
+        return None, compute_utility(board, color)
 
     elif (limit == 0):
-        return (None, compute_utility(board, color))
+        return None, compute_utility(board, color)
     
     else:
-        u_value_best = float('inf')
+        u_value_best = len(board) * len(board) # set at max possible value
         move_best = None
 
         for move in valid_moves:
-            new_board = play_move(board, color, move[0], move[1])
-            u_value = minimax_max_node(new_board, oppo_color, limit - 1, caching)[1]
+            new_board = play_move(board, oppo_color, move[0], move[1])
+
+            # check if the new board is in the cache
+            if new_board in cached and caching:
+                new_move, u_value = cached[new_board]
             
+            else:
+                new_move, u_value = minimax_max_node(new_board, color, limit - 1, caching)
+               
+                if (caching):
+                    cached[new_board] = (new_move, u_value)
+        
             # get the min value:
             if(u_value < u_value_best):
                 u_value_best = u_value
                 move_best = move
 
-        if (caching):
-            cached[(board, color)] = (move_best, u_value_best)
-    
         return (move_best, u_value_best)
+
+    return ((0,0),0)
 
 def minimax_max_node(board, color, limit, caching = 0): #returns highest possible utility
     
-    # check if in the cached
-    if (board, color) in cached:
-        return cached[(board, color)]
+    # Determine the player color
+    if color == 1:
+        oppo_color = 2
+    else:
+        oppo_color = 1
 
     # the valid moved
     valid_moves = get_possible_moves(board, color)
     
     if (len(valid_moves) == 0):
         # no move valid and board is not cached
-        if (caching):
-            cached[(board, color)] = (None, compute_utility(board, color))
-        return (None, compute_utility(board, color))
+        return None, compute_utility(board, color)
 
     elif (limit == 0):
-        return (None, compute_utility(board, color))
+        return None, compute_utility(board, color)
     
     else:
-        u_value_best = float('-inf')
+        u_value_best = -1 * len(board) * len(board) # set at max possible value
         move_best = None
 
         for move in valid_moves:
-            # Determine the player color
-            if color == 1:
-                oppo_color = 2
-            else:
-                oppo_color = 1
-
             new_board = play_move(board, color, move[0], move[1])
-            u_value = minimax_min_node(new_board, oppo_color, limit - 1, caching)[1]
+
+            # check if the new board is in the cache
+            if new_board in cached and caching:
+                new_move, u_value = cached[new_board]
             
+            else:
+                new_move, u_value = minimax_max_node(new_board, color, limit - 1, caching)
+               
+                if (caching):
+                    cached[new_board] = (new_move, u_value)
+        
             # get the min value:
             if(u_value > u_value_best):
                 u_value_best = u_value
                 move_best = move
 
-        if (caching):
-            cached[(board, color)] = (move_best, u_value_best)
-    
         return (move_best, u_value_best)
+
+    return ((0,0),0)
 
 
 def select_move_minimax(board, color, limit, caching = 0):
@@ -138,98 +142,124 @@ def select_move_minimax(board, color, limit, caching = 0):
 ############ ALPHA-BETA PRUNING #####################
 def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
     #IMPLEMENT (and replace the line below)
+    # Determine the player color
+    if color == 1:
+        oppo_color = 2
+    else:
+        oppo_color = 1
 
-    # if (board, color) in cached:
-    #     return cached[(board, color)]
+    ordered_list = []
+
+    # the valid moved
+    valid_moves = get_possible_moves(board, oppo_color)
     
-    # # the valid moved
-    # valid_moves = get_possible_moves(board, color)
+    if (len(valid_moves) == 0):
+        # no move valid and board is not cached
+        return None, compute_utility(board, color)
+
+    elif (limit == 0):
+        return None, compute_utility(board, color)
     
-    # if (len(valid_moves) == 0):
-    #     # no move valid and board is not cached
-    #     if (caching):
-    #         cached[(board, color)] = (None, compute_utility(board, color))
-    #     return (None, compute_utility(board, color))
+    else:
+        for move in valid_moves:
+            new_board = play_move(board, oppo_color, move[0], move[1])
+            ordered_list.append((move, new_board))
+            # sord by the board
+            #,reverse=True
+            ordered_list.sort(key=lambda u_value: compute_utility(u_value, color), reverse=True)
 
-    # elif (limit == 0):
-    #     return (None, compute_utility(board, color))
-    
-    # else:
-    #     u_value_best = float('inf')
-    #     move_best = None
+        if ordering:
+            valid_moves = ordered_list
 
-    #     for move in valid_moves:
-    #         # Determine the player color
-    #         if color == 1:
-    #             oppo_color = 2
-    #         else:
-    #             oppo_color = 1
+        u_value_best = len(board) * len(board) # set at max possible value
+        move_best = None
 
-    #         new_board = play_move(board, color, move[0], move[1])
-    #         u_value = alphabeta_max_node(new_board, oppo_color, alpha, beta, limit - 1, caching, ordering)[1]
+        for move in valid_moves:
+
+            # check if the new board is in the cache
+            if board in cached and caching:
+                new_move, u_value = cached[board]
             
-    #         # get the min value:
-    #         if(u_value < u_value_best):
-    #             u_value_best = u_value
-    #             move_best = move
+            else:
+                new_move, u_value = alphabeta_max_node(board, color, alpha, beta, limit - 1, caching, ordering)
+               
+                if (caching):
+                    cached[board] = (new_move, u_value)
+        
+            # get the min value:
+            if(u_value < u_value_best):
+                u_value_best = u_value
+                move_best = move
 
-    #             if(u_value_best <= alpha):
-    #                 return u_value_best
-                
-    #             beta = min(beta, u_value_best) 
+            if u_value_best <= alpha:
+                return move_best, u_value_best
+            
+            if u_value_best < beta:
+                beta = u_value_best
 
-    #     if (caching):
-    #         cached[(board, color)] = (move_best, u_value_best)
-    
-    #     return (move_best, u_value_best)
+        return (move_best, u_value_best)
+
     return ((0,0),0)
 
 
 def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
     #IMPLEMENT (and replace the line below)
-    # if (board, color) in cached:
-    #     return cached[(board, color)]
-    
-    # # the valid moved
-    # valid_moves = get_possible_moves(board, color)
-    
-    # if (len(valid_moves) == 0):
-    #     # no move valid and board is not cached
-    #     if (caching):
-    #         cached[(board, color)] = (None, compute_utility(board, color))
-    #     return (None, compute_utility(board, color))
+    if color == 1:
+        oppo_color = 2
+    else:
+        oppo_color = 1
 
-    # elif (limit == 0):
-    #     return (None, compute_utility(board, color))
+    ordered_list = []
+
+    # the valid moved
+    valid_moves = get_possible_moves(board, color)
     
-    # else:
-    #     u_value_best = float('-inf')
-    #     move_best = None
+    if (len(valid_moves) == 0):
+        # no move valid and board is not cached
+        return None, compute_utility(board, color)
 
-    #     for move in valid_moves:
-    #         # Determine the player color
-    #         if color == 1:
-    #             oppo_color = 2
-    #         else:
-    #             oppo_color = 1
+    elif (limit == 0):
+        return None, compute_utility(board, color)
+    
+    else:
 
-    #         new_board = play_move(board, color, move[0], move[1])
-    #         u_value = alphabeta_min_node(new_board, oppo_color, alpha, beta, limit - 1, caching, ordering)[1]
+        for move in valid_moves:
+            new_board = play_move(board, color, move[0], move[1])
+            ordered_list.append((move, new_board))
+            # sord by the board
+            ordered_list.sort(key=lambda u_value: compute_utility(u_value, color), reverse=True)
+
+        if ordering:
+            valid_moves = ordered_list
+
+        u_value_best = -1 * len(board) * len(board) # set at max possible value
+        move_best = None
+
+        for move in valid_moves:
+
+            # check if the new board is in the cache
+            if board in cached and caching:
+                new_move, u_value = cached[board]
             
-    #         # get the min value:
-    #         if(u_value > u_value_best):
-    #             u_value_best = u_value
-    #             move_best = move
+            else:
+                new_move, u_value = alphabeta_min_node(board, color, alpha, beta, limit - 1, caching, ordering)
+               
+                if (caching):
+                    cached[board] = (new_move, u_value)
+        
+            # get the min value:
+            if(u_value > u_value_best):
+                u_value_best = u_value
+                move_best = move
 
-    #             if(u_value_best >= beta):
-    #                 return u_value_best
-                
-    #             alpha = min(alpha, u_value_best) 
+            if u_value_best >= beta:
+                return move_best, u_value_best
+            
+            if u_value_best > alpha:
+                beta = u_value_best
 
-    #     if (caching):
-    #         cached[(board, color)] = (move_best, u_value_best)
-    
-    #     return (move_best, u_value_best)
+        return (move_best, u_value_best)
+
     return ((0,0),0)
 
 def select_move_alphabeta(board, color, limit, caching = 0, ordering = 0):
@@ -248,12 +278,10 @@ def select_move_alphabeta(board, color, limit, caching = 0, ordering = 0):
     If ordering is OFF (i.e. 0), do NOT use node ordering to expedite pruning and reduce the number of state evaluations. 
     """
     #IMPLEMENT (and replace the line below)
-    #return alphabeta_max_node(board, color, float("-inf"), float("inf"), limit, caching, ordering)[0] #change this!
-    # alpha = -1 * len(board) * len(board)
-    # beta = -1 * alpha
-    # move, utiltiy = alphabeta_max_node(board, color, alpha, beta, 6, caching, ordering)
-    # return move
-    return ((0,0),0)
+    alpha = -1 * len(board) * len(board)
+    beta = -1 * alpha
+    move, utiltiy = alphabeta_max_node(board, color, alpha, beta, limit, caching, ordering)
+    return move
 
 
 ####################################################
