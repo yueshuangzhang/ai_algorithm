@@ -275,7 +275,7 @@ def select_move_alphabeta(board, color, limit, caching = 0, ordering = 0):
     alpha = float("-Inf")
     beta = float("Inf")
     
-    move, utiltiy = alphabeta_max_node(board, color, float("-Inf"), float("Inf"), limit, caching, ordering)
+    move, utiltiy = alphabeta_max_node(board, color, alpha, beta, limit, caching, ordering)
     return move
 
 
