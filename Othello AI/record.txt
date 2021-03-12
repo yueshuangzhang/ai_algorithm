@@ -3,19 +3,29 @@ You computed correct utilities for 6 of 6 small boards
 Testing Minimax (with Depth Limit of 6)
 You computed correct minimax moves for 3 of 6 small boards
 Testing Alphabeta (with Depth Limit of 6)
-You computed correct alphabeta moves for 2 of 6 small boards
+You computed correct alphabeta moves for 6 of 6 small boards
 Testing Minimax and Alphabeta Moves Equality (with Depth Limit of 6)
-You computed correct moves for 1 of 5 tests
+You computed correct moves for 2 of 5 tests
 Testing Caching Big
-State caching improved the time of your alpha-beta for 5 of 5 boards
+State caching improved the time of your alpha-beta for 4 of 5 boards
 Move choice with and without caching is the same for 5 of 5 boards
 Testing Ordering
-Node ordering improved the time of your alpha-beta for 3 of 5 boards
+(3, 0)
+(3, 0)
+(5, 5)
+(5, 5)
+(1, 5)
+(1, 5)
+(5, 2)
+(5, 2)
+(3, 4)
+(3, 4)
+Node ordering improved the time of your alpha-beta for 5 of 5 boards
 Testing Alpha Beta Min Node - Player 1
-You computed correct alpha-beta min moves for 2 of 5 boards
-You computed correct alpha-beta min values for 0 of 5 boards
+You computed correct alpha-beta min moves for 5 of 5 boards
+You computed correct alpha-beta min values for 5 of 5 boards
 Testing Alpha Beta Max Node - Player 1
-You computed correct alpha-beta max moves for 0 of 3 boards
+You computed correct alpha-beta max moves for 3 of 3 boards
 You computed correct alpha-beta max values for 0 of 3 boards
 Testing Minimax Min Node - Player 1
 You computed correct minimax min moves for 5 of 5 boards
@@ -24,17 +34,14 @@ Testing Minimax Max Node - Player 1
 You computed correct minimax max moves for 3 of 3 boards
 You computed correct minimax max values for 3 of 3 boards
 Testing Alpha Beta Min Node - Player 2
-You computed correct alpha-beta min moves for 0 of 5 boards
+You computed correct alpha-beta min moves for 2 of 5 boards
 You computed correct alpha-beta min values for 0 of 5 boards
 Testing Alpha Beta Max Node - Player 2
-You computed correct alpha-beta max moves for 1 of 3 boards
-You computed correct alpha-beta max values for 0 of 3 boards
+You computed correct alpha-beta max moves for 3 of 3 boards
+You computed correct alpha-beta max values for 3 of 3 boards
 Testing Minimax Min Node - Player 2
 You computed correct minimax min moves for 5 of 5 boards
 You computed correct minimax min values for 5 of 5 boards
 Testing Minimax Max Node - Player 2
 You computed correct minimax max moves for 3 of 3 boards
 You computed correct minimax max values for 3 of 3 boards
-
-
-

@@ -167,33 +167,37 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
 
         # Get the utility of all the moves
         for item in valid_moves:
+            current_move = item[0]
+            current_board = item[1]
 
             # Get the next board from that move
-            next_board = play_move(board, oppo_color, item[0], item[1])
+            next_board = play_move(board, oppo_color, current_move, current_board)
 
             # Add the moves to the list
             ordered_list.append((item, next_board))
 
         # Sort the list by utility
-        ordered_list.sort(key = lambda util: compute_utility(util[1], color))
+        ordered_list.sort(key = lambda utility: compute_utility(utility[1], color))
 
         # For item possible move, get the max utiltiy
         for item in ordered_list:
+            current_move = item[0]
+            current_board = item[1]
 
             # First check the cache for the board
-            if item[1] in cached_alpha_beta:
-                move, new_utiltiy = cached_alpha_beta[item[1]]
+            if current_board in cached_alpha_beta:
+                move, new_utiltiy = cached_alpha_beta[current_board]
 
             else:
                 # If the new utility is less than the current min, update min_utiltiy
-                move, new_utiltiy = alphabeta_max_node(item[1], color, alpha, beta, limit-1, caching, ordering)
+                move, new_utiltiy = alphabeta_max_node(current_board, color, alpha, beta, limit-1, caching, ordering)
                 
                 if caching:
-                    cached_alpha_beta[item[1]] = (move, new_utiltiy)
+                    cached_alpha_beta[current_board] = (move, new_utiltiy)
 
             if new_utiltiy < u_value_best:
                 u_value_best = new_utiltiy
-                move_best = item[0]
+                move_best = current_move
 
             if u_value_best <= alpha:
                 return move_best, u_value_best 
@@ -204,8 +208,7 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
         # After checking every move, return the minimum utility
         return move_best, u_value_best
 
-    # Default return - should never be called
-    return None, None
+    return ((0,0),0)
 
 
 def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
@@ -220,51 +223,56 @@ def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering =
     # Else if there are moves, get their utility and return the min
     else:  
         # Store the minimum utility possible to use as a starting point for min  
-        max_utility = -1 * len(board)*len(board)
-        max_move = None
+        u_value_best = -1 * len(board)*len(board)
+        move_best = None
 
         ordered_list = []
 
         # Get the utility of all the moves
         for item in valid_moves:
+            current_move = item[0]
+            current_board = item[1]
 
             # Get the next board from that move
-            next_board = play_move(board, color, item[0], item[1])
+            next_board = play_move(board, color, current_move, current_board)
 
             # Add the moves to the list
             ordered_list.append((item, next_board))
 
         # Sort the list by utility (reversed so when iterated, it starts at the greatest value)
-        ordered_list.sort(key = lambda util: compute_utility(util[1], color), reverse=True)
+        ordered_list.sort(key = lambda utility: compute_utility(utility[1], color), reverse=True)
 
         # For item possible move, get the min utiltiy
         for item in ordered_list:
 
+            current_move = item[0]
+            current_board = item[1]
+            
+
             # First check the cache for the board
-            if item[1] in cached_alpha_beta:
-                move, new_utiltiy = cached_alpha_beta[item[1]]
+            if current_board in cached_alpha_beta:
+                move, new_utiltiy = cached_alpha_beta[current_board]
 
             else:
-                # If the new utility is greater than the current max, update max_utility
-                move, new_utiltiy = alphabeta_min_node(item[1], color, alpha, beta, limit-1, caching, ordering)
+                # If the new utility is greater than the current max, update u_value_best
+                move, new_utiltiy = alphabeta_min_node(current_board, color, alpha, beta, limit-1, caching, ordering)
                 if caching:
-                    cached_alpha_beta[item[1]] = (move, new_utiltiy)
+                    cached_alpha_beta[current_board] = (move, new_utiltiy)
 
-            if new_utiltiy > max_utility:
-                max_utility = new_utiltiy
-                max_move = item[0]
+            if new_utiltiy > u_value_best:
+                u_value_best = new_utiltiy
+                move_best = current_move
 
-            if max_utility >= beta:
-                return max_move, max_utility
+            if u_value_best >= beta:
+                return move_best, u_value_best
 
-            if max_utility > alpha:
-                alpha = max_utility
+            if u_value_best > alpha:
+                alpha = u_value_best
 
         # After checking every move, return the maximum utility
-        return max_move, max_utility
+        return move_best, u_value_best
 
-    # Default return - should never be called
-    return None, None
+    return ((0,0),0)
 
 
 def select_move_alphabeta(board, color, limit, caching = 0, ordering = 0):
