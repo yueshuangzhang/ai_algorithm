@@ -201,11 +201,11 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
                 u_value_best = new_utiltiy
                 move_best = current_move
 
-            if u_value_best <= alpha:
-                return move_best, u_value_best 
-
             if u_value_best < beta:
                 beta = u_value_best
+
+            if u_value_best <= alpha:
+                return move_best, u_value_best 
 
         return move_best, u_value_best
 
@@ -271,11 +271,11 @@ def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering =
                 u_value_best = new_utiltiy
                 move_best = current_move
 
-            if u_value_best >= beta:
-                return move_best, u_value_best
-
             if u_value_best > alpha:
                 alpha = u_value_best
+
+            if u_value_best >= beta:
+                return move_best, u_value_best
 
         return move_best, u_value_best
 
