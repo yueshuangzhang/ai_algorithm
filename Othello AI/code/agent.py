@@ -140,6 +140,7 @@ def select_move_minimax(board, color, limit, caching = 0):
     return move
 
 ############ ALPHA-BETA PRUNING #####################
+cached_alpha_beta = {}
 def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
     #IMPLEMENT (and replace the line below)
     # Determine the player color
@@ -149,8 +150,8 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
         oppo_color = 1
 
     if caching:
-        if board in cached:
-            return cached[board]
+        if board in cached_alpha_beta:
+            return cached_alpha_beta[board]
 
     ordered_list = []
 
@@ -181,7 +182,7 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
             new_move, u_value = alphabeta_max_node(board, oppo_color, alpha, beta, limit - 1, caching, ordering)
             
             if (caching):
-                cached[board] = (new_move, u_value)
+                cached_alpha_beta[board] = (new_move, u_value)
         
             # get the min value:
             if(u_value < u_value_best):
@@ -207,8 +208,8 @@ def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering =
         oppo_color = 1
 
     if caching:
-        if board in cached:
-            return cached[board]
+        if board in cached_alpha_beta:
+            return cached_alpha_beta[board]
 
     ordered_list = []
 
@@ -239,7 +240,7 @@ def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering =
             new_move, u_value = alphabeta_min_node(board, color, alpha, beta, limit - 1, caching, ordering)
             
             if (caching):
-                cached[board] = (new_move, u_value)
+                cached_alpha_beta[board] = (new_move, u_value)
         
             # get the min value:
             if(u_value > u_value_best):
