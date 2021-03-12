@@ -140,66 +140,70 @@ def select_move_minimax(board, color, limit, caching = 0):
     return move
 
 
-board_utilities = {}
+cached_alpha_beta = {}
 ############ ALPHA-BETA PRUNING #####################
 def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
     # Get the color of the next player
     if color == 1:
-        other_color = 2
+        oppo_color = 2
     else:
-        other_color = 1
+        oppo_color = 1
 
     # Get the allowed moves
-    all_moves = get_possible_moves(board, other_color)
+    valid_moves = get_possible_moves(board, oppo_color)
 
     # If there are no moves left, return the utility
-    if len(all_moves) == 0 or limit == 0:
+    if len(valid_moves) == 0:
+        return None, compute_utility(board, color)
+    elif limit == 0:
         return None, compute_utility(board, color)
 
     # Else if there are moves, get their utility and return the min
     else:  
         # Get the maximum utility possible to use as a starting point for min  
-        min_utility = len(board)*len(board)
-        min_move = None
+        u_value_best = float("Inf")
+        move_best = None
 
-        all_moves_sorted = []
+        ordered_list = []
 
         # Get the utility of all the moves
-        for each in all_moves:
+        for item in valid_moves:
 
             # Get the next board from that move
-            next_board = play_move(board, other_color, each[0], each[1])
+            next_board = play_move(board, oppo_color, item[0], item[1])
 
             # Add the moves to the list
-            all_moves_sorted.append((each, next_board))
+            ordered_list.append((item, next_board))
 
         # Sort the list by utility
-        all_moves_sorted.sort(key = lambda util: compute_utility(util[1], color))
+        ordered_list.sort(key = lambda util: compute_utility(util[1], color))
 
-        # For each possible move, get the max utiltiy
-        for each in all_moves_sorted:
+        # For item possible move, get the max utiltiy
+        for item in ordered_list:
 
             # First check the cache for the board
-            if each[1] in board_utilities:
-                move, new_utiltiy = board_utilities[each[1]]
+            if item[1] in cached_alpha_beta:
+                move, new_utiltiy = cached_alpha_beta[item[1]]
 
             else:
                 # If the new utility is less than the current min, update min_utiltiy
-                move, new_utiltiy = alphabeta_max_node(each[1], color, alpha, beta, limit-1, caching, ordering)
-                board_utilities[each[1]] = (move, new_utiltiy)
+                move, new_utiltiy = alphabeta_max_node(item[1], color, alpha, beta, limit-1, caching, ordering)
+                
+                if caching:
+                    cached_alpha_beta[item[1]] = (move, new_utiltiy)
 
-            if new_utiltiy < min_utility:
-                min_utility = new_utiltiy
-                min_move = each[0]
+            if new_utiltiy < u_value_best:
+                u_value_best = new_utiltiy
+                move_best = item[0]
 
-            if min_utility <= alpha:
-                return min_move, min_utility 
+            if u_value_best <= alpha:
+                return move_best, u_value_best 
 
-            if min_utility < beta:
-                beta = min_utility
+            if u_value_best < beta:
+                beta = u_value_best
 
         # After checking every move, return the minimum utility
-        return min_move, min_utility
+        return move_best, u_value_best
 
     # Default return - should never be called
     return None, None
@@ -208,10 +212,10 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
 def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
     #IMPLEMENT (and replace the line below)
     # Get the allowed moves
-    all_moves = get_possible_moves(board, color)
+    valid_moves = get_possible_moves(board, color)
 
     # If there are no moves left, return the utility
-    if len(all_moves) == 0 or limit == 0:
+    if len(valid_moves) == 0 or limit == 0:
         return None, compute_utility(board, color)
 
     # Else if there are moves, get their utility and return the min
@@ -220,35 +224,36 @@ def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering =
         max_utility = -1 * len(board)*len(board)
         max_move = None
 
-        all_moves_sorted = []
+        ordered_list = []
 
         # Get the utility of all the moves
-        for each in all_moves:
+        for item in valid_moves:
 
             # Get the next board from that move
-            next_board = play_move(board, color, each[0], each[1])
+            next_board = play_move(board, color, item[0], item[1])
 
             # Add the moves to the list
-            all_moves_sorted.append((each, next_board))
+            ordered_list.append((item, next_board))
 
         # Sort the list by utility (reversed so when iterated, it starts at the greatest value)
-        all_moves_sorted.sort(key = lambda util: compute_utility(util[1], color), reverse=True)
+        ordered_list.sort(key = lambda util: compute_utility(util[1], color), reverse=True)
 
-        # For each possible move, get the min utiltiy
-        for each in all_moves_sorted:
+        # For item possible move, get the min utiltiy
+        for item in ordered_list:
 
             # First check the cache for the board
-            if each[1] in board_utilities:
-                move, new_utiltiy = board_utilities[each[1]]
+            if item[1] in cached_alpha_beta:
+                move, new_utiltiy = cached_alpha_beta[item[1]]
 
             else:
                 # If the new utility is greater than the current max, update max_utility
-                move, new_utiltiy = alphabeta_min_node(each[1], color, alpha, beta, limit-1, caching, ordering)
-                board_utilities[each[1]] = (move, new_utiltiy)
+                move, new_utiltiy = alphabeta_min_node(item[1], color, alpha, beta, limit-1, caching, ordering)
+                if caching:
+                    cached_alpha_beta[item[1]] = (move, new_utiltiy)
 
             if new_utiltiy > max_utility:
                 max_utility = new_utiltiy
-                max_move = each[0]
+                max_move = item[0]
 
             if max_utility >= beta:
                 return max_move, max_utility
@@ -329,7 +334,7 @@ def run_ai():
         else:
             board = eval(input()) # Read in the input and turn it into a Python
                                   # object. The format is a list of rows. The
-                                  # squares in each row are represented by
+                                  # squares in item row are represented by
                                   # 0 : empty square
                                   # 1 : dark disk (player 1)
                                   # 2 : light disk (player 2)
