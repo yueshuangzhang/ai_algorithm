@@ -191,7 +191,7 @@ def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering =
                 new_move, new_utiltiy = cached_alpha_beta[current_board]
 
             else:
-                new_move, new_utiltiy = alphabeta_max_node(current_board, color, alpha, beta, limit-1, caching, ordering)
+                new_move, new_utiltiy = alphabeta_max_node(current_board, color, alpha, beta, limit - 1, caching, ordering)
                 
                 if caching:
                     cached_alpha_beta[current_board] = (new_move, new_utiltiy)
@@ -262,7 +262,7 @@ def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering =
                 move, new_utiltiy = cached_alpha_beta[current_board]
 
             else:
-                move, new_utiltiy = alphabeta_min_node(current_board, color, alpha, beta, limit-1, caching, ordering)
+                move, new_utiltiy = alphabeta_min_node(current_board, color, alpha, beta, limit - 1, caching, ordering)
                 if caching:
                     cached_alpha_beta[current_board] = (move, new_utiltiy)
 
