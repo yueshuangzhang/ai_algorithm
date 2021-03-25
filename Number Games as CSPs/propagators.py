@@ -94,13 +94,108 @@ def prop_FC(csp, newVar=None):
        track of all pruned variable,value pairs and return '''
     #IMPLEMENT
 
+    pruned = []
+    constraint_list = []
+    
+    # get the constrains if the new var is not empty
+    if newVar == None:
+        constraint_list = csp.get_all_cons()
+    else:
+        constraint_list = csp.get_cons_with_var(newVar)
+
+    # variable,value pair
+    for constraint in constraint_list:
+        # == Var == #
+        # get unasgn var from constrain if there is any, check size
+        var = None
+        if (len(constraint.get_unasgn_vars()) != 0):
+            var = constraint.get_unasgn_vars()[0]
+
+        # == Val == #
+        # get the val, check the size
+        if var == None:
+            return False, pruned
+            
+        if var.cur_domain_size() == 0:
+            return False, pruned
+ 
+        # loop through the none empty domain
+        for domain in var.cur_domain():
+            if not constraint.has_support(var, domain):
+                pair = (var, domain)
+
+                if not(pair in pruned):
+                    pruned.append(pair)
+                    var.prune_value(domain)
+
+    # end of the for loop, return value
+    return True, pruned
+
+
 def prop_GAC(csp, newVar=None):
     '''Do GAC propagation. If newVar is None we do initial GAC enforce 
        processing all constraints. Otherwise we do GAC enforce with
        constraints containing newVar on GAC Queue'''
     #IMPLEMENT
+    pruned = []
+    constraint_list = []
+    
+    # get the constrains if the new var is not empty
+    if newVar == None:
+        constraint_list = csp.get_all_cons()
+    else:
+        constraint_list = csp.get_cons_with_var(newVar)
+
+    while len(constraint_list) != 0:
+
+        constraint = constraint_list.pop(0)
+
+        for var in constraint.get_scope():
+
+            # check if var is none:
+            if var == None:
+                return False, pruned
+            
+            # check if domain size is 0
+            if var.cur_domain_size() == 0:
+                return False, pruned
+                
+            # loop through the none empty domain
+            for domain in var.cur_domain():
+
+                if not constraint.has_support(var, domain):
+                    pair = (var, domain)
+
+                    if not(pair in pruned):
+                        pruned.append(pair)
+                        var.prune_value(domain)
+
+                        for value_contrains in csp.get_cons_with_var(var):
+                            if not (value_contrains in constraint_list):
+                                constraint_list.append(value_contrains)
+    
+    # till the end of while loop
+    return True, pruned
 
 def ord_mrv(csp):
     ''' return variable according to the Minimum Remaining Values heuristic '''
     #IMPLEMENT
+    # loop through the csp variables and get the min value
+
+    min_size = float('inf')
+    min_value = None
+
+    # check if the csp is empty to avoid seg fault when removing
+    if (csp.get_all_unasgn_vars() == []):
+        return min_value
+    else:
+        for value in csp.get_all_unasgn_vars():
+            if value.cur_domain_size() < min_size:
+                min_size = value.cur_domain_size()
+                min_value = value
+
+        # remove the returned value
+        csp.get_all_unasgn_vars.remove(min_value)
+
+    return min_value
 	
