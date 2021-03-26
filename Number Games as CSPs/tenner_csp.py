@@ -97,7 +97,7 @@ def tenner_csp_model_1(initial_tenner_board):
   cons = []
   # return value:
   # add scope to csp
-  csp = CSP("model 1", [value for sublist in vars for value in sublist])
+  csp = CSP("model 1", [scope for v in vars for scope in v])
 
   # =============================== ROW CONSTRAINS ===============================
 
@@ -106,23 +106,23 @@ def tenner_csp_model_1(initial_tenner_board):
   # check # in a row - no repeat
   for row in range(num_row):
     for col in range(10):
-        for col_remain in range(col + 1, 10):
+      for col_remain in range(col + 1, 10):
 
-          possible_pair = []
-          current_var = vars[row][col]
-          valid_var = vars[row][col_remain]
-          # loop through all possible
-          for vars_pair in itertools.product(current_var.cur_domain(), valid_var.cur_domain()):   
-            # for all the variable pairs, if they are not equal, then it's valid
-            if vars_pair[0] != vars_pair[1]:
-              possible_pair.append(vars_pair)
-            else:
-              possible_pair = []
-              
-          # create new contrains for all vars and add it
-          new_con = Constraint("C:(row {},col {})".format(row,col),[current_var, valid_var])
-          new_con.add_satisfying_tuples(possible_pair)
-          cons.append(new_con)
+        possible_pair = []
+        current_var = vars[row][col]
+        valid_var = vars[row][col_remain]
+        # loop through all possible
+        for vars_pair in itertools.product(current_var.cur_domain(), valid_var.cur_domain()):   
+          # for all the variable pairs, if they are not equal, then it's valid
+          if vars_pair[0] != vars_pair[1]:
+            possible_pair.append(vars_pair)
+          else:
+            possible_pair = []
+            
+        # create new contrains for all vars and add it
+        new_con = Constraint("C:(row {},col {})".format(row,col),[current_var, valid_var])
+        new_con.add_satisfying_tuples(possible_pair)
+        cons.append(new_con)
 
 
   # =============================== ADJ CONSTRAINS ===============================
@@ -298,34 +298,35 @@ def tenner_csp_model_2(initial_tenner_board):
   cons = []
   # return value:
   # add scope to csp
-  csp = CSP("model 1", [value for sublist in vars for value in sublist])
+  csp = CSP("model 2", [scope for v in vars for scope in v])
 
   # =============================== ROW CONSTRAINS ===============================
 
   possible_pair = []
 
   # check # in a row - no repeat
+  print("current domain: ", domain)
+  
+  '''
   for row in range(num_row):
+
+    possible_pair = []
+    var_in_row = []
+
     for col in range(10):
-        for col_remain in range(col + 1, 10):
+      if initial_tenner_board[0][row][col] != -1:
+        if initial_tenner_board[0][row][col] in domain:
+          domain.remove(initial_tenner_board[0][row][col]) #make the domain smaller
+      else:
+        var_in_row.append(vars[row][col])
 
-          possible_pair = []
-          current_var = vars[row][col]
-          valid_var = vars[row][col_remain]
-          # loop through all possible
-          for vars_pair in itertools.product(current_var.cur_domain(), valid_var.cur_domain()):   
-            # for all the variable pairs, if they are not equal, then it's valid
-            if vars_pair[0] != vars_pair[1]:
-              possible_pair.append(vars_pair)
-            else:
-              possible_pair = []
-              
-          # create new contrains for all vars and add it
-          new_con = Constraint("C:(row {},col {})".format(row,col),[current_var, valid_var])
-          new_con.add_satisfying_tuples(possible_pair)
-          cons.append(new_con)
+    for vars_pair in itertools.permutations(domain):
+      possible_pair.append(vars_pair)
 
-
+    new_con = Constraint("C{}".format(row), var_in_row)
+    new_con.add_satisfying_tuples(possible_pair)
+    cons.append(new_con)
+  '''
   # =============================== ADJ CONSTRAINS ===============================
 
   # The digits in adjacent cells (even cells that are diagonally adjacent) 
