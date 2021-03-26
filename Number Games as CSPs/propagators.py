@@ -108,25 +108,26 @@ def prop_FC(csp, newVar=None):
         # == Var == #
         # get unasgn var from constrain if there is any, check size
         var = None
+        
         if (len(constraint.get_unasgn_vars()) != 0):
             var = constraint.get_unasgn_vars()[0]
 
-        # == Val == #
-        # get the val, check the size
-        if var == None:
-            return False, pruned
-            
-        if var.cur_domain_size() == 0:
-            return False, pruned
- 
-        # loop through the none empty domain
-        for domain in var.cur_domain():
-            if not constraint.has_support(var, domain):
-                pair = (var, domain)
+            # == Val == #
+            # get the val, check the size
+            if var == None:
+                return False, pruned
+                
+            if var.cur_domain_size() == 0:
+                return False, pruned
+    
+            # loop through the none empty domain
+            for domain in var.cur_domain():
+                if not constraint.has_support(var, domain):
+                    pair = (var, domain)
 
-                if not(pair in pruned):
-                    pruned.append(pair)
-                    var.prune_value(domain)
+                    if not(pair in pruned):
+                        pruned.append(pair)
+                        var.prune_value(domain)
 
     # end of the for loop, return value
     return True, pruned
