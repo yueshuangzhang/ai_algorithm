@@ -82,12 +82,10 @@ def tenner_csp_model_1(initial_tenner_board):
     for col in range(10):
       # if this is a space to fill
       if (initial_tenner_board[0][row][col] == -1):
-        domain = []
         for k in range(10):
           domain.append(k)
       # the number is fixed
       else:
-          domain = []
           domain.append(initial_tenner_board[0][row][col])
 
       row_vars.append(Variable('{}{}'.format(row, col), domain))
@@ -104,27 +102,27 @@ def tenner_csp_model_1(initial_tenner_board):
   possible_pair = []
 
   # check # in a row - no repeat
+  
   for row in range(num_row):
     for col in range(10):
       for col_remain in range(col + 1, 10):
 
         possible_pair = []
+
         current_var = vars[row][col]
         valid_var = vars[row][col_remain]
+
         # loop through all possible
         for vars_pair in itertools.product(current_var.cur_domain(), valid_var.cur_domain()):   
           # for all the variable pairs, if they are not equal, then it's valid
           if vars_pair[0] != vars_pair[1]:
             possible_pair.append(vars_pair)
-          else:
-            possible_pair = []
             
         # create new contrains for all vars and add it
         new_con = Constraint("C:(row {},col {})".format(row,col),[current_var, valid_var])
         new_con.add_satisfying_tuples(possible_pair)
         cons.append(new_con)
-
-
+        
   # =============================== ADJ CONSTRAINS ===============================
 
   # The digits in adjacent cells (even cells that are diagonally adjacent) 
@@ -148,8 +146,6 @@ def tenner_csp_model_1(initial_tenner_board):
         for vars_pair in itertools.product(current_var.cur_domain(), bot_left_var.cur_domain()):
           if vars_pair[0] != vars_pair[1]:
             possible_pair.append(vars_pair)
-          else:
-            possible_pair = []
 
         new_con = Constraint("C:(row {},col {})".format(row,col),[current_var, bot_left_var])
         new_con.add_satisfying_tuples(possible_pair)
@@ -165,8 +161,6 @@ def tenner_csp_model_1(initial_tenner_board):
       for vars_pair in itertools.product(current_var.cur_domain(), bot_var.cur_domain()):
         if vars_pair[0] != vars_pair[1]:
           possible_pair.append(vars_pair)
-        else:
-          possible_pair = []
 
       new_con = Constraint("C:(row {},col {})".format(row,col),[current_var, bot_var])
       new_con.add_satisfying_tuples(possible_pair)
@@ -181,13 +175,10 @@ def tenner_csp_model_1(initial_tenner_board):
         for vars_pair in itertools.product(current_var.cur_domain(), bot_right_var.cur_domain()):
           if vars_pair[0] != vars_pair[1]:
             possible_pair.append(vars_pair)
-          else:
-            possible_pair = []
 
         new_con = Constraint("C:(row {},col {})".format(row,col),[current_var, bot_right_var])
         new_con.add_satisfying_tuples(possible_pair)
         cons.append(new_con)
-
 
   # =============================== SUM CONSTRAINS ===============================
 
@@ -218,7 +209,6 @@ def tenner_csp_model_1(initial_tenner_board):
     cons.append(new_con)
     
   # =============================== compute return value ===============================
-  
   for con in cons:
     csp.add_constraint(con)
 
@@ -352,8 +342,6 @@ def tenner_csp_model_2(initial_tenner_board):
         for vars_pair in itertools.product(current_var.cur_domain(), bot_left_var.cur_domain()):
           if vars_pair[0] != vars_pair[1]:
             possible_pair.append(vars_pair)
-          else:
-            possible_pair = []
 
         new_con = Constraint("C:(row {},col {})".format(row,col),[current_var, bot_left_var])
         new_con.add_satisfying_tuples(possible_pair)
@@ -369,8 +357,6 @@ def tenner_csp_model_2(initial_tenner_board):
       for vars_pair in itertools.product(current_var.cur_domain(), bot_var.cur_domain()):
         if vars_pair[0] != vars_pair[1]:
           possible_pair.append(vars_pair)
-        else:
-          possible_pair = []
 
       new_con = Constraint("C:(row {},col {})".format(row,col),[current_var, bot_var])
       new_con.add_satisfying_tuples(possible_pair)
@@ -385,8 +371,6 @@ def tenner_csp_model_2(initial_tenner_board):
         for vars_pair in itertools.product(current_var.cur_domain(), bot_right_var.cur_domain()):
           if vars_pair[0] != vars_pair[1]:
             possible_pair.append(vars_pair)
-          else:
-            possible_pair = []
 
         new_con = Constraint("C:(row {},col {})".format(row,col),[current_var, bot_right_var])
         new_con.add_satisfying_tuples(possible_pair)
@@ -425,10 +409,9 @@ def tenner_csp_model_2(initial_tenner_board):
   
   for con in cons:
     csp.add_constraint(con)
-
   return csp, vars
 
-
+'''
 b1 = ([[-1, 0, 1,-1, 9,-1,-1, 5,-1, 2],
        [-1, 7,-1,-1,-1, 6, 1,-1,-1,-1],
        [-1,-1,-1, 8,-1,-1,-1,-1,-1, 9],
@@ -450,4 +433,4 @@ if csp != None:
     solver.bt_search(prop_GAC, var_ord=ord_mrv)
     print("Solution")
     print_tenner_soln(var_array)
-
+'''
