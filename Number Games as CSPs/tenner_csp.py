@@ -96,7 +96,8 @@ def tenner_csp_model_1(initial_tenner_board):
   # generate constrains
   cons = []
   # return value:
-  csp = CSP("model 1", cons)
+  # add scope to csp
+  csp = CSP("model 1", [value for sublist in vars for value in sublist])
 
   # =============================== ROW CONSTRAINS ===============================
 
@@ -119,7 +120,7 @@ def tenner_csp_model_1(initial_tenner_board):
               possible_pair = []
               
           # create new contrains for all vars and add it
-          new_con = Constraint("C:(Q{},Q{})".format(row,col),[current_var, valid_var])
+          new_con = Constraint("C:(row {},col {})".format(row,col),[current_var, valid_var])
           new_con.add_satisfying_tuples(possible_pair)
           cons.append(new_con)
 
@@ -134,22 +135,10 @@ def tenner_csp_model_1(initial_tenner_board):
   for row in range(num_row - 1): 
     for col in range(10):
 
-      # # check the var below
-      # possible_pair = []
-      # # row col and i+1, j
-      # current_var = vars[row][col]
-      # bot_var = vars[i + 1][col]
-      # for vars_pair in itertools.product(current_var.cur_domain(), bot_var.cur_domain()):
-      #   if vars_pair[0] != vars_pair[1]:
-      #     possible_pair.append(vars_pair)
-      #   else:
-      #     possible_pair = []
+      # Since the left/right in the same row, -> no need to check, included previously
+      # check bottom left, bottom, bottom right
 
-      # new_con = itertools.product(vars[row][col].cur_domain(), vars[row][k].cur_domain())("BottomC(Q{},Q{})".format(i,j), [current_var, bot_var])
-      # new_con.add_satisfying_tuples(possible_pair)
-      # cons.append(new_con)
-
-      # check bottom left
+      # === bottom left ===
       if col != 0:
         current_var = vars[row][col]
         bot_left_var = vars[row + 1][col - 1]
@@ -162,11 +151,28 @@ def tenner_csp_model_1(initial_tenner_board):
           else:
             possible_pair = []
 
-        new_con = Constraint("C:(Q{},Q{})".format(row,col),[current_var,bot_left_var])
+        new_con = Constraint("C:(row {},col {})".format(row,col),[current_var, bot_left_var])
         new_con.add_satisfying_tuples(possible_pair)
         cons.append(new_con)
 
-      # check bottom right
+
+      # === bot === 
+      # check the var below
+      possible_pair = []
+      # row col and row+1, col
+      current_var = vars[row][col]
+      bot_var = vars[row + 1][col]
+      for vars_pair in itertools.product(current_var.cur_domain(), bot_var.cur_domain()):
+        if vars_pair[0] != vars_pair[1]:
+          possible_pair.append(vars_pair)
+        else:
+          possible_pair = []
+
+      new_con = Constraint("C:(row {},col {})".format(row,col),[current_var, bot_var])
+      new_con.add_satisfying_tuples(possible_pair)
+      cons.append(new_con)
+
+      # === bottom right ===
       if col != 9: 
         current_var = vars[row][col]
         bot_right_var = vars[row + 1][col + 1]
@@ -178,10 +184,10 @@ def tenner_csp_model_1(initial_tenner_board):
           else:
             possible_pair = []
 
-        new_con = Constraint("C:(Q{},Q{})".format(row,col),[current_var, bot_right_var])
+        new_con = Constraint("C:(row {},col {})".format(row,col),[current_var, bot_right_var])
         new_con.add_satisfying_tuples(possible_pair)
         cons.append(new_con)
-    
+
 
   # =============================== SUM CONSTRAINS ===============================
 
@@ -207,18 +213,14 @@ def tenner_csp_model_1(initial_tenner_board):
       if col_sum == initial_tenner_board[1][col]:
         possible_sum_pair.append(var)
 
-    new_con = Constraint("C:(Q{},Q{})".format(row,col), vars_in_col)
+    new_con = Constraint("C:(row {},col {})".format(row,col), vars_in_col)
     new_con.add_satisfying_tuples(possible_sum_pair)
     cons.append(new_con)
     
   # =============================== compute return value ===============================
-
+  
   for con in cons:
     csp.add_constraint(con)
-
-  # csp = CSP("Tenner", [value for sublist in vars for value in sublist])
-  # for c in cons:
-  #     csp.add_constraint(c)
 
   return csp, vars
 
