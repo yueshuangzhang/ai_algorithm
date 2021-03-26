@@ -305,10 +305,12 @@ def tenner_csp_model_2(initial_tenner_board):
   possible_pair = []
 
   # check # in a row - no repeat
-  print("current domain: ", domain)
-  
-  '''
+
   for row in range(num_row):
+    # ensure for every row, the domain is complete
+    domain = []
+    for k in range(10):
+      domain.append(k)
 
     possible_pair = []
     var_in_row = []
@@ -326,7 +328,7 @@ def tenner_csp_model_2(initial_tenner_board):
     new_con = Constraint("C{}".format(row), var_in_row)
     new_con.add_satisfying_tuples(possible_pair)
     cons.append(new_con)
-  '''
+  
   # =============================== ADJ CONSTRAINS ===============================
 
   # The digits in adjacent cells (even cells that are diagonally adjacent) 
@@ -425,3 +427,27 @@ def tenner_csp_model_2(initial_tenner_board):
     csp.add_constraint(con)
 
   return csp, vars
+
+
+b1 = ([[-1, 0, 1,-1, 9,-1,-1, 5,-1, 2],
+       [-1, 7,-1,-1,-1, 6, 1,-1,-1,-1],
+       [-1,-1,-1, 8,-1,-1,-1,-1,-1, 9],
+       [ 6,-1, 4,-1,-1,-1,-1, 7,-1,-1],
+       [-1, 1,-1, 3,-1,-1, 5, 8, 2,-1]],
+      [29,16,18,21,24,24,21,28,17,27])
+
+from propagators import prop_FC,  prop_GAC, ord_mrv
+
+def print_tenner_soln(var_array):
+    for row in var_array:
+        print([var.get_assigned_value() for var in row])
+
+csp, var_array = tenner_csp_model_1(b1)
+if csp != None:
+    solver = BT(csp)
+    print("=======================================================")
+    print("GAC")
+    solver.bt_search(prop_GAC, var_ord=ord_mrv)
+    print("Solution")
+    print_tenner_soln(var_array)
+
