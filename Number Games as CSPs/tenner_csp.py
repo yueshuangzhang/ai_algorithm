@@ -8,6 +8,13 @@ Construct and return Tenner Grid CSP models.
 from cspbase import *
 import itertools
 
+def binary_not_equal(i,j):
+    return i!=j
+
+def nary_sum_check(t,tenner_sum): 
+    #t is a tuple
+    return sum(t) == tenner_sum
+
 def tenner_csp_model_1(initial_tenner_board):
   '''Return a CSP object representing a Tenner Grid CSP problem along 
       with an array of variables for the problem. That is return
@@ -103,25 +110,19 @@ def tenner_csp_model_1(initial_tenner_board):
 
   # check # in a row - no repeat
   
-  for row in range(num_row):
-    for col in range(10):
-      for col_remain in range(col + 1, 10):
+  for i in range(len(initial_tenner_board[0])):
+    for j in range(10):
+      for k in range(j+1, 10):
 
-        possible_pair = []
+        con = Constraint("C(Q{},Q{})".format(i,j),[vars[i][j],vars[i][k]])
+        sat_tuples = []
 
-        current_var = vars[row][col]
-        valid_var = vars[row][col_remain]
-
-        # loop through all possible
-        for vars_pair in itertools.product(current_var.cur_domain(), valid_var.cur_domain()):   
-          # for all the variable pairs, if they are not equal, then it's valid
-          if vars_pair[0] != vars_pair[1]:
-            possible_pair.append(vars_pair)
-            
-        # create new contrains for all vars and add it
-        new_con = Constraint("C:(row {},col {})".format(row,col),[current_var, valid_var])
-        new_con.add_satisfying_tuples(possible_pair)
-        cons.append(new_con)
+        for t in itertools.product(vars[i][j].cur_domain(), vars[i][k].cur_domain()):   
+          if binary_not_equal(t[0],t[1]):
+            sat_tuples.append(t)
+        con.add_satisfying_tuples(sat_tuples)
+        cons.append(con)
+  print("Done here")
         
   # =============================== ADJ CONSTRAINS ===============================
 
@@ -411,7 +412,7 @@ def tenner_csp_model_2(initial_tenner_board):
     csp.add_constraint(con)
   return csp, vars
 
-'''
+
 b1 = ([[-1, 0, 1,-1, 9,-1,-1, 5,-1, 2],
        [-1, 7,-1,-1,-1, 6, 1,-1,-1,-1],
        [-1,-1,-1, 8,-1,-1,-1,-1,-1, 9],
@@ -433,4 +434,4 @@ if csp != None:
     solver.bt_search(prop_GAC, var_ord=ord_mrv)
     print("Solution")
     print_tenner_soln(var_array)
-'''
+
