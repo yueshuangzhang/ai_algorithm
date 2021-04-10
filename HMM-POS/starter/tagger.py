@@ -26,6 +26,7 @@ def tag(training_list, test_file, output_file):
         return
     else:
         print("training start")
+        print(len(vocab))
         return
 
 if __name__ == '__main__':
