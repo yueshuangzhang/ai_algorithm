@@ -10,7 +10,23 @@ def tag(training_list, test_file, output_file):
     print("Tagging the file.")
     #
     # YOUR IMPLEMENTATION GOES HERE
-    #
+    vocab = []
+    vocab_label = []
+    for training_file in training_list:
+        with open(training_file) as t_file:
+            for line in t_file:
+                line=line.strip()
+                if not line:continue
+                words=line.split(" : ")
+                vocab.append(words[:1])
+                vocab_label.append(words[1:])
+
+    if  len(vocab)!=len(vocab_label):
+        print("words and label doesn't match")
+        return
+    else:
+        print("training start")
+        return
 
 if __name__ == '__main__':
     # Run the tagger function.
