@@ -10,24 +10,50 @@ def tag(training_list, test_file, output_file):
     print("Tagging the file.")
     #
     # YOUR IMPLEMENTATION GOES HERE
-    vocab = []
-    vocab_label = []
-    for training_file in training_list:
-        with open(training_file) as t_file:
-            for line in t_file:
-                line=line.strip()
-                if not line:continue
-                words=line.split(" : ")
-                vocab.append(words[:1])
-                vocab_label.append(words[1:])
 
-    if  len(vocab)!=len(vocab_label):
-        print("words and label doesn't match")
-        return
-    else:
-        print("training start")
-        print(len(vocab))
-        return
+    # ==============================================================================
+    # ================================== Training ==================================
+    # ==============================================================================
+
+    # Load data
+    training_vocab_list = []
+    label_list = dict()
+
+    label_counter = 1 # 0 is reserved for the start state.
+    word_counter = 0
+
+    for training_file in training_list:
+        with open(training_file) as train_file:
+            for line in train_file:
+                line = line.strip()
+                if not line:continue
+                words = line.split(" : ")
+                if len(words) != 2:
+                    print("word & label not match")
+                    return
+                training_vocab_list.append((words[0], words[1]))
+                if (words[1] not in label_list):
+                    label_list.append(words[1])
+
+    print("training start")
+
+
+
+
+    # ==============================================================================
+    # =================================== Testing ==================================
+    # ==============================================================================
+    testing_vocab_list = []
+
+    with open(test_file) as test_file:
+        for line in test_file:
+            line = line.strip()
+            # each line is a testing words
+            testing_vocab_list.append(line)
+
+
+
+    return
 
 if __name__ == '__main__':
     # Run the tagger function.
