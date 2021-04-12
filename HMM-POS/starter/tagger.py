@@ -36,32 +36,54 @@ def tag(training_list, test_file, output_file):
 
     for training_file in training_list:
         with open(training_file) as train_file:
-            
+
+            has_quo = False
+            sentence_complete = False
+            sentence = []
+            sentence_labels = []
+
             for line in train_file:
                 line = line.strip()
                 if not line:continue
+
                 words = line.split(" : ")
                 if len(words) != 2:
                     print("word & label not match")
                     return
-
-                if words[0] in ['.','!','?']:
-                    lineCount +=1
-                sentence.append(words[0])
-                sentence_label.append(words[1])
-
+                
                 #record the existing labels
                 if (words[1] not in state_list):
                     state_list.append(words[1])
+                
+                if words[0] == '"':
+                    if has_quo == True: 
+                        has_quo = False
+                    elif has_quo == False: 
+                        has_quo = True
+                
+                if words[0] in ['.','!','?']:
+                    sentence_complete = True
+
+                sentence.append(words[0])
+                sentence_labels.append(words[1])
+                
+                if (sentence_complete and has_quo == False):
+                    lineCount +=1
+                    training_vocab_list.append(sentence)
+                    training_label_list.append(sentence_labels)
+                    sentence = []
+                    sentence_labels = []
+                    sentence_complete = False
+
                     
+            if (len(sentence) != 0):
+                lineCount +=1
+                training_vocab_list.append(sentence)
+                training_label_list.append(sentence_labels)
 
-            training_vocab_list.append(sentence)
-            training_label_list.append(sentence_label)
-
-            sentence = []
-            sentence_label = []
-
-
+    # print(training_vocab_list[-1])
+    # print(training_label_list[-1])
+    # return
     # So now the training vocab and label list contains all info
     for state0 in state_list:
         transport_c[state0]={}
@@ -76,6 +98,7 @@ def tag(training_list, test_file, output_file):
     print("training start")
 
     for i in range (len(training_vocab_list)):
+        # each file and its sentences
         training_sentence = training_vocab_list[i]
         traning_label = training_label_list[i]
 
@@ -100,40 +123,73 @@ def tag(training_list, test_file, output_file):
     # ==============================================================================
     # =================================== Testing ==================================
     # ==============================================================================
+    test_strs=["Detective","Chief","Inspector","John","McLeish","gazed","doubtfully","at","the","plate","before","him","."]
+
+
     print("testing start")
     testing_vocab_list = []
+#    testing_vocab_list = test_strs
 
     with open(test_file) as test_file:
-        for line in test_file:
-            word = line.strip()
+        has_quo = False
+        sentence_complete = False
+        sentence = []
+        for word in test_file:
+            word = word.strip()
             if not word:continue
-            testing_vocab_list.append(word)
+            
+            if word == '"':
+                if has_quo == True: 
+                    has_quo = False
+                elif has_quo == False: 
+                    has_quo = True
+            
+            if word in ['.','!','?']:
+                sentence_complete = True
+
+            sentence.append(word)
+
+            if (sentence_complete and has_quo == False):
+                testing_vocab_list.append(sentence)
+                sentence = []
+                sentence_complete = False
+
+        if (len(sentence) != 0):
+            testing_vocab_list.append(sentence)
 
     f = open(output_file,'w')
 
-    path = {}
-    V = [{}]  # 记录第几次的概率
-    for state in state_list:
-        V[0][state] = start_c[state] * emit_c[state].get(testing_vocab_list[0], 0)
-        path[state] = [state]
+    count = 0
+    for sentence in testing_vocab_list:
+        path = {}
+        V = [{}]  # 记录第几次的概率
+        for state in state_list:
+            V[0][state] = start_c[state] * emit_c[state].get(sentence[0], 0)
+            path[state] = [state]
 
-    for n in range(1, len(testing_vocab_list)):
-        V.append({})
-        newpath = {}
-        for k in state_list:
-            pp,pat=max([(V[n - 1][j] * transport_c[j].get(k,0) * emit_c[k].get(testing_vocab_list[n], 0) ,j )for j in state_list])
-            V[n][k] = pp
-            newpath[k] = path[pat] + [k]
-        path = newpath
+        for n in range(1, len(sentence)):
+            V.append({})
+            newpath = {}
+            for k in state_list:
+                pp,pat=max([(V[n - 1][j] * transport_c[j].get(k,0) * emit_c[k].get(sentence[n], 0) ,j )for j in state_list])
+                V[n][k] = pp
+                newpath[k] = path[pat] + [k]
+            path = newpath
 
-    (prob, state) = max([(V[len(testing_vocab_list) - 1][y], y) for y in state_list])
+        (prob, state) = max([(V[len(sentence) - 1][y], y) for y in state_list])
 
-    pred = path[state]
+        pred = path[state]
 
-    for index in range (len(testing_vocab_list)):
-        f.write(testing_vocab_list[index] + " " + pred[index] + '\n')
-
+        for index in range (len(sentence)):
+            # print(sentence[index])
+            # print(pred[index])
+            f.write(sentence[index] + " " + pred[index] + '\n')
+            # if sentence[index] == ".":
+            #     count += 1
+            # if count==5:
+            #     return
     f.close()
+
     return
 
 if __name__ == '__main__':
