@@ -31,11 +31,12 @@ def tag(training_list, test_file, output_file):
 
     lineCount = -1#句子总数，为了求出开始概率
     class_count={}
+    sentence = []
+    sentence_label = []
 
     for training_file in training_list:
-        with open(training_file, encoding='utf8',errors='replace') as train_file:
-            sentence = []
-            sentence_label = []
+        with open(training_file) as train_file:
+            
             for line in train_file:
                 line = line.strip()
                 if not line:continue
@@ -44,20 +45,22 @@ def tag(training_list, test_file, output_file):
                     print("word & label not match")
                     return
 
-                if words[0] not in ['.','!','?']:
-                    sentence.append(words[0])
-                    sentence_label.append(words[1])
-                else:
-                    sentence.append(words[0])
-                    sentence_label.append(words[1])
-                    training_vocab_list.append(sentence)
-                    training_label_list.append(sentence_label)
-                    sentence = []
-                    sentence_label = []
+                if words[0] in ['.','!','?']:
+                    lineCount +=1
+                sentence.append(words[0])
+                sentence_label.append(words[1])
 
                 #record the existing labels
                 if (words[1] not in state_list):
                     state_list.append(words[1])
+                    
+
+            training_vocab_list.append(sentence)
+            training_label_list.append(sentence_label)
+
+            sentence = []
+            sentence_label = []
+
 
     # So now the training vocab and label list contains all info
     for state0 in state_list:
@@ -75,7 +78,8 @@ def tag(training_list, test_file, output_file):
     for i in range (len(training_vocab_list)):
         training_sentence = training_vocab_list[i]
         traning_label = training_label_list[i]
-        for n in range(0,len(training_sentence)):
+
+        for n in range(0, len(training_sentence)):
             class_count[traning_label[n]]+=1.0
             if training_sentence[n] in emit_c[traning_label[n]]:
                 emit_c[traning_label[n]][training_sentence[n]] += 1.0
@@ -93,71 +97,43 @@ def tag(training_list, test_file, output_file):
         for li in transport_c[state]:
             transport_c[state][li]=transport_c[state][li]/class_count[state]
    
-    file0=open('start.txt','w',encoding='utf8')
-    file0.write(str(start_c))
-    file1=open('tran.txt','w',encoding='utf8')
-    file1.write(str(transport_c))
-    file2=open('emit.txt','w',encoding='utf8')
-    file2.write(str(emit_c))
-    file0.close()
-    file1.close()
-    file2.close()
     # ==============================================================================
     # =================================== Testing ==================================
     # ==============================================================================
-    print("Start testing")
-    file0=open('start.txt','r')
-    start_c=eval(file0.read())
-    file1=open('emit.txt','r',encoding='utf8')
-    emit_c=eval(file1.read())
-    file2=open('tran.txt','r',encoding='utf8')
-    trans_c=eval(file2.read())
-
+    print("testing start")
     testing_vocab_list = []
 
     with open(test_file) as test_file:
-        sentence = []
         for line in test_file:
             word = line.strip()
             if not word:continue
-                
-            if word not in ['.','!','?']:
-                sentence.append(word)
-            else:
-                sentence.append(word)
-                testing_vocab_list.append(sentence)
-                sentence = []
+            testing_vocab_list.append(word)
 
     f = open(output_file,'w')
 
-    for sentence in testing_vocab_list:
-        path = {}
-        V = [{}]  # 记录第几次的概率
-        for state in state_list:
-            V[0][state] = start_c[state] * emit_c[state].get(sentence[0], 0)
-            path[state] = [state]
-        for n in range(1, len(sentence)):
-            V.append({})
-            newpath = {}
-            for k in state_list:
-                pp,pat=max([(V[n - 1][j] * trans_c[j].get(k,0) * emit_c[k].get(sentence[n], 0) ,j )for j in state_list])
-                V[n][k] = pp
-                newpath[k] = path[pat] + [k]
-            path = newpath
+    path = {}
+    V = [{}]  # 记录第几次的概率
+    for state in state_list:
+        V[0][state] = start_c[state] * emit_c[state].get(testing_vocab_list[0], 0)
+        path[state] = [state]
 
-        (prob, state) = max([(V[len(sentence) - 1][y], y) for y in state_list])
+    for n in range(1, len(testing_vocab_list)):
+        V.append({})
+        newpath = {}
+        for k in state_list:
+            pp,pat=max([(V[n - 1][j] * transport_c[j].get(k,0) * emit_c[k].get(testing_vocab_list[n], 0) ,j )for j in state_list])
+            V[n][k] = pp
+            newpath[k] = path[pat] + [k]
+        path = newpath
 
-        p = prob
-        out_list = path[state]
-        print(out_list)
-        
-        pred = path[state]
+    (prob, state) = max([(V[len(testing_vocab_list) - 1][y], y) for y in state_list])
 
-        for index in range (len(sentence)):
-            f.write(sentence[index] + " " + pred[index] + '\n')
+    pred = path[state]
+
+    for index in range (len(testing_vocab_list)):
+        f.write(testing_vocab_list[index] + " " + pred[index] + '\n')
 
     f.close()
-
     return
 
 if __name__ == '__main__':
