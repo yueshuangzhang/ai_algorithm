@@ -187,12 +187,39 @@ def tag(training_list, test_file, output_file):
                                 max_pos = emis_list[curr_label][temp_word]
                                 pred = curr_label
                     if max_pos == 0:
-                        # get the max from state
+                        # try remove tense:
+                        # ing and ed
+                        is_ing = False
+                        is_ed = False
+                        if 'ing' == word[len(word)-3:]:
+                            is_ing = True
+                        elif 'ed' == word[len(word)-2:]:
+                            is_ed = True
+                        
+                        if is_ing:
+                            temp_word = word[:len(word)-3]
+                        elif is_ed:
+                            temp_word = word[:len(word)-2]
+
+                        #try upper case
                         for curr_label in label_list:
-                            temp = start_list[curr_label]
-                            if temp > max_pos:
-                                pred = curr_label
-                                max_pos = temp
+                            if temp_word in emis_list[curr_label]:
+                                if emis_list[curr_label][temp_word] > max_pos:
+                                    max_pos = emis_list[curr_label][temp_word]
+                                    pred = curr_label
+
+                        if is_ing and pred == 'NN1':
+                            pred = 'VVG'
+                        elif is_ed and pred == 'NN1':
+                            pred = 'VVD'
+
+                        else: # giveup
+                            # get the max from state
+                            for curr_label in label_list:
+                                temp = start_list[curr_label]
+                                if temp > max_pos:
+                                    pred = curr_label
+                                    max_pos = temp
             
             f.write(word + " : " + pred + '\n')   
 
