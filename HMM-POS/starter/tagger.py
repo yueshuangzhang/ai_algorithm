@@ -191,15 +191,28 @@ def tag(training_list, test_file, output_file):
                         # ing and ed
                         is_ing = False
                         is_ed = False
+                        has_ment = False
+                        is_pl = False
+                        has_ful = False
+
                         if 'ing' == word[len(word)-3:]:
                             is_ing = True
+                            temp_word = word[:len(word)-3]
                         elif 'ed' == word[len(word)-2:]:
                             is_ed = True
-                        
-                        if is_ing:
-                            temp_word = word[:len(word)-3]
-                        elif is_ed:
                             temp_word = word[:len(word)-2]
+                        elif 'ment' == word[len(word)-4:]:
+                            has_ment = True
+                            temp_word = word[:len(word)-4]
+                        elif 's' == word[len(word)-1:]:
+                            is_pl = True 
+                            temp_word = word[:len(word)-1]
+                        elif 'es' == word[len(word)-2:]:
+                            is_pl = True 
+                            temp_word = word[:len(word)-2]
+                        elif 'ful' == word[len(word)-3:]:
+                            has_ful = True 
+                            temp_word = word[:len(word)-3]
 
                         #try upper case
                         for curr_label in label_list:
@@ -208,10 +221,16 @@ def tag(training_list, test_file, output_file):
                                     max_pos = emis_list[curr_label][temp_word]
                                     pred = curr_label
 
-                        if is_ing and pred == 'NN1':
+                        if is_ing and pred == 'VVI':
                             pred = 'VVG'
-                        elif is_ed and pred == 'NN1':
+                        elif is_ed and pred == 'VVI':
                             pred = 'VVD'
+                        elif has_ment and pred == 'VVI':
+                            pred = 'NN1'
+                        if is_pl and pred == 'NN1':
+                            pred = 'NN2'
+                        if has_ful and pred == 'NN1':
+                            pred = 'AJ0'
 
                         else: # giveup
                             # get the max from state
