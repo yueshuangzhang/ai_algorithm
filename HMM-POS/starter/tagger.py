@@ -19,13 +19,12 @@ def tag(training_list, test_file, output_file):
     # Load data
     training_vocab_list = []
     training_label_list = []
-    initial_list={}
+    start_list={}
     transport_list={}
-    emit_list={}
+    emis_list={}
 
     label_list = []
 
-    line_count = -1
     class_count={}
     sentence = []
     sentence_label = []
@@ -52,10 +51,8 @@ def tag(training_list, test_file, output_file):
                     label_list.append(words[1])
                 
                 if words[0] == '"':
-                    if has_quo == True: 
-                        has_quo = False
-                    elif has_quo == False: 
-                        has_quo = True
+                    if has_quo: has_quo = False
+                    else: has_quo = True
                 
                 if words[0] in ['.','!','?']:
                     sentence_complete = True
@@ -64,7 +61,6 @@ def tag(training_list, test_file, output_file):
                 sentence_labels.append(words[1])
                 
                 if (sentence_complete and has_quo == False):
-                    line_count +=1
                     training_vocab_list.append(sentence)
                     training_label_list.append(sentence_labels)
                     sentence = []
@@ -73,7 +69,6 @@ def tag(training_list, test_file, output_file):
 
                     
             if (len(sentence) != 0):
-                line_count +=1
                 training_vocab_list.append(sentence)
                 training_label_list.append(sentence_labels)
 
@@ -82,15 +77,15 @@ def tag(training_list, test_file, output_file):
     # return
     # So now the training vocab and label list contains all info
 
-    for state0 in label_list:
-        transport_list[state0]={}
-        for state1 in label_list:
-            transport_list[state0][state1]=0.0
-        emit_list[state0]={}
-        initial_list[state0]=0.0
-
     for curr_label in label_list:
-        class_count[curr_label]=0.0
+        transport_list[curr_label] = {}
+        for next_label in label_list:
+            transport_list[curr_label][next_label] = 0
+        emis_list[curr_label] = {}
+        start_list[curr_label] = 0
+        class_count[curr_label] = 0
+
+        
 
     print("training start")
 
@@ -100,27 +95,27 @@ def tag(training_list, test_file, output_file):
         traning_label = training_label_list[i]
 
         for n in range(0, len(training_sentence)):
-            class_count[traning_label[n]]+=1.0
-            if training_sentence[n] in emit_list[traning_label[n]]:
-                emit_list[traning_label[n]][training_sentence[n]] += 1.0
+            class_count[traning_label[n]] += 1
+            if training_sentence[n] in emis_list[traning_label[n]]:
+                emis_list[traning_label[n]][training_sentence[n]] += 1
             else:
-                emit_list[traning_label[n]][training_sentence[n]] = 1.0
+                emis_list[traning_label[n]][training_sentence[n]] = 1
             if n == 0:
-                initial_list[traning_label[n]] += 1.0
+                start_list[traning_label[n]] += 1
             else:
-                transport_list[traning_label[n-1]][traning_label[n]] += 1.0
+                transport_list[traning_label[n-1]][traning_label[n]] += 1
 
-    #calculate possibility
+    #calculate possibility for emission and transport
     for curr_label in label_list:
-        initial_list[curr_label]=initial_list[curr_label]*1.0/line_count
-        for current_word in emit_list[curr_label]:
-            emit_list[curr_label][current_word]=emit_list[curr_label][current_word]/class_count[curr_label]
+        start_list[curr_label]=start_list[curr_label] / len(training_vocab_list)
+        for current_word in emis_list[curr_label]:
+            emis_list[curr_label][current_word] = emis_list[curr_label][current_word] / class_count[curr_label]
         for current_word in transport_list[curr_label]:
-            transport_list[curr_label][current_word]=transport_list[curr_label][current_word]/class_count[curr_label]
+            transport_list[curr_label][current_word] = transport_list[curr_label][current_word] / class_count[curr_label]
 
-    # print(initial_list)
+    # print(start_list)
     # print(transport_list)
-    # print(emit_list)
+    # print(emis_list)
     # ==============================================================================
     # =================================== Testing ==================================
     # ==============================================================================
@@ -138,11 +133,9 @@ def tag(training_list, test_file, output_file):
             word = word.strip()
             if not word:continue
             
-            if word == '"':
-                if has_quo == True: 
-                    has_quo = False
-                elif has_quo == False: 
-                    has_quo = True
+            if words[0] == '"':
+                if has_quo: has_quo = False
+                else: has_quo = True
             
             if word in ['.','!','?']:
                 sentence_complete = True
@@ -169,19 +162,38 @@ def tag(training_list, test_file, output_file):
             #print(word)
             # get the possibility list for this word:
             for curr_label in label_list:
-                if word in emit_list[curr_label]:
-                    if emit_list[curr_label][word] > max_pos:
-                        max_pos = emit_list[curr_label][word]
+                if word in emis_list[curr_label]:
+                    if emis_list[curr_label][word] > max_pos:
+                        max_pos = emis_list[curr_label][word]
                         pred = curr_label
 
             # incase unseen words
             if max_pos == 0:
-                # get the max from state
+                # try lower case
+                temp_word = word.lower()
                 for curr_label in label_list:
-                    temp = initial_list[curr_label]
-                    if temp > max_pos:
-                        pred = curr_label
-                        max_pos = temp
+                    if temp_word in emis_list[curr_label]:
+                        if emis_list[curr_label][temp_word] > max_pos:
+                            max_pos = emis_list[curr_label][temp_word]
+                            pred = curr_label
+
+                if max_pos == 0:
+                    temp_word = word
+                    temp_word[0].upper()
+                    #try upper case
+                    for curr_label in label_list:
+                        if temp_word in emis_list[curr_label]:
+                            if emis_list[curr_label][temp_word] > max_pos:
+                                max_pos = emis_list[curr_label][temp_word]
+                                pred = curr_label
+                    if max_pos == 0:
+                        # get the max from state
+                        for curr_label in label_list:
+                            temp = start_list[curr_label]
+                            if temp > max_pos:
+                                pred = curr_label
+                                max_pos = temp
+            
             f.write(word + " : " + pred + '\n')   
 
 
