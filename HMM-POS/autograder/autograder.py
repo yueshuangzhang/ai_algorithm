@@ -11,12 +11,12 @@ if __name__ == '__main__':
     # Invoke the shell command to train and test the HMM tagger
     print("Training on autotraining.txt, running tests on autotest.txt. "
           "Output --> autooutput.txt")
-    os.system("python tagger_hmm.py -d autotraining.txt -t test10.txt -o autooutput.txt")
+    os.system("python tagger_hmm.py -d autotraining.txt -t autotest.txt -o autooutput.txt")
 
     # Compare the contents of the HMM tagger output with the reference solution.
     # Store the missed cases and overall stats in results.txt
     with open("autooutput.txt", "r") as output_file, \
-         open("training10.txt", "r") as solution_file, \
+         open("autosolution.txt", "r") as solution_file, \
          open("results.txt", "w") as results_file:
         # Each word is on a separate line in each file.
         output = output_file.readlines()
